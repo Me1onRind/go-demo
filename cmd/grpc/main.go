@@ -3,12 +3,14 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/Me1onRind/go-demo/internal/core/middleware"
 	"log"
 	"net"
 
 	"github.com/Me1onRind/go-demo/internal/controller"
 	"github.com/Me1onRind/go-demo/internal/core/register"
 	"github.com/Me1onRind/go-demo/protobuf/pb"
+	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 
 	"google.golang.org/grpc"
 )
@@ -25,7 +27,11 @@ func main() {
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
-	s := grpc.NewServer()
+	s := grpc.NewServer(grpc_middleware.WithUnaryServerChain(
+		middleware.GrpcContext(),
+		middleware.GrpcRecover(),
+		middleware.GrpcLogger(),
+	))
 	registerService(s)
 
 	if err := register.Register(ctx, "go-demo", addr); err != nil {

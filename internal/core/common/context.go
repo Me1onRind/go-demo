@@ -2,9 +2,11 @@ package common
 
 import (
 	"context"
+	"os"
 
 	"github.com/google/uuid"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
 type contextKey struct{}
@@ -15,7 +17,9 @@ var (
 )
 
 func init() {
-	logger, _ = zap.NewDevelopment()
+	file, _ := os.OpenFile("./log/info.log", os.O_WRONLY|os.O_RDONLY|os.O_APPEND, 0655)
+	core := zapcore.NewCore(zapcore.NewConsoleEncoder(zap.NewProductionEncoderConfig()), zapcore.AddSync(file), zapcore.InfoLevel)
+	logger = zap.New(core, zap.AddCaller())
 }
 
 type Context struct {

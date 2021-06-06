@@ -9,36 +9,58 @@ import (
 	"go.etcd.io/etcd/client/v3"
 	"go.etcd.io/etcd/client/v3/naming/resolver"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/status"
 )
 
-func Test_Greet(t *testing.T) {
+var c pb.FooClient
 
+func TestMain(m *testing.M) {
 	cli, err := clientv3.NewFromURL("http://localhost:2379")
 	if err != nil {
-		t.Fatal(err)
+		panic(err)
 	}
 	builder, err := resolver.NewBuilder(cli)
 	if err != nil {
-		t.Fatal(err)
+		panic(err)
 	}
 	conn, err := grpc.Dial("etcd:///service/go-demo",
 		grpc.WithResolvers(builder),
 		grpc.WithBalancerName("round_robin"),
 		grpc.WithInsecure(), grpc.WithTimeout(time.Second))
 	if err != nil {
-		t.Fatal(err)
+		panic(err)
 	}
+	c = pb.NewFooClient(conn)
+	m.Run()
+}
 
-	fooClient := pb.NewFooClient(conn)
+func Test_Greet(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*2)
 	defer cancel()
-	resp, err := fooClient.Greet(ctx, &pb.GreetReq{
+	resp, err := c.Greet(ctx, &pb.GreetReq{
 		MyName: "Bar",
 		Msg:    "Hello, World",
 	})
 	if err != nil {
 		t.Fatal(err)
 	}
-
 	t.Log(resp.Msg)
+}
+
+func Test_ErrorResult(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*2)
+	defer cancel()
+	_, err := c.ErrorResult(ctx, &pb.Empty{})
+	if err != nil {
+		if s, ok := status.FromError(err); ok {
+			details := s.Details()
+			if len(details) > 0 {
+				if e, ok := details[0].(*pb.Error); ok {
+					t.Log(e.Code, e.Message)
+				}
+			}
+		} else {
+			t.Fatal(err)
+		}
+	}
 }

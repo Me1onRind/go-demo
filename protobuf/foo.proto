@@ -4,6 +4,7 @@ package pb;
 
 service Foo {
     rpc Greet(GreetReq) returns (GreetResp);
+    rpc ErrorResult(Empty) returns (Empty);
 }
 
 message GreetReq {
@@ -14,3 +15,5 @@ message GreetReq {
 message GreetResp {
     string msg = 1;
 }
+
+message Empty {}
