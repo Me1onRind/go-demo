@@ -1,1 +1,1 @@
-# go-micro-demo
+# go-demo
