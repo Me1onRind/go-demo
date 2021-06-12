@@ -17,8 +17,10 @@ var (
 )
 
 func init() {
-	//file, _ := os.OpenFile("./log/info.log", os.O_WRONLY|os.O_RDONLY|os.O_APPEND, 0755)
-	core := zapcore.NewCore(zapcore.NewConsoleEncoder(zap.NewProductionEncoderConfig()), zapcore.AddSync(os.Stdout), zapcore.InfoLevel)
+	config := zap.NewProductionEncoderConfig()
+	config.EncodeDuration = zapcore.MillisDurationEncoder
+	config.EncodeTime = zapcore.ISO8601TimeEncoder
+	core := zapcore.NewCore(zapcore.NewConsoleEncoder(config), zapcore.AddSync(os.Stdout), zapcore.InfoLevel)
 	logger = zap.New(core, zap.AddCaller())
 }
 

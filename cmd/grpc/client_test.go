@@ -12,6 +12,7 @@ import (
 	clientv3 "go.etcd.io/etcd/client/v3"
 	"go.etcd.io/etcd/client/v3/naming/resolver"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
@@ -34,7 +35,7 @@ func TestMain(m *testing.M) {
 		grpc.WithBalancerName("round_robin"),
 		grpc.WithInsecure(), grpc.WithTimeout(time.Second),
 		grpc.WithChainUnaryInterceptor(grpc_middleware.ChainUnaryClient(
-			middleware.ClientRetry(1),
+			middleware.ClientRetry(1, middleware.RetryOnlyByCode(codes.Unavailable)),
 			middleware.ClientLogger(),
 		)),
 	)
@@ -46,7 +47,6 @@ func TestMain(m *testing.M) {
 }
 
 func Test_Greet(t *testing.T) {
-	t.Skip()
 	ctx, cancel := context.WithTimeout(commonCtx, time.Second*2)
 	defer cancel()
 	resp, err := c.Greet(ctx, &pb.GreetReq{

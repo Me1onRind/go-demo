@@ -26,9 +26,13 @@ func GrpcLogger() grpc.UnaryServerInterceptor {
 func ClientLogger() grpc.UnaryClientInterceptor {
 	return func(ctx context.Context, method string, req, reply interface{}, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
 		var err error
+		begin := time.Now()
 		defer func() {
 			commonCtx := common.GetContext(ctx)
-			commonCtx.Logger.Info("grpc request", zap.String("method", method), zap.Reflect("req", req), zap.Reflect("reply", reply), zap.Error(err))
+			commonCtx.Logger.Info("grpc request",
+				zap.String("method", method), zap.Reflect("req", req), zap.Reflect("reply", reply),
+				zap.Duration("cost", time.Since(begin)), zap.Error(err),
+			)
 		}()
 		err = invoker(ctx, method, req, reply, cc, opts...)
 		return err
