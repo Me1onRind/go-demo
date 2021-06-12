@@ -10,7 +10,6 @@ import (
 func GrpcContext() grpc.UnaryServerInterceptor {
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
 		commonCtx := common.NewContext(ctx)
-		ctx = common.StoreContext(ctx, commonCtx)
-		return handler(ctx, req)
+		return handler(commonCtx, req)
 	}
 }

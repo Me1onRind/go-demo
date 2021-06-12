@@ -5,14 +5,20 @@ import (
 	"testing"
 	"time"
 
+	"github.com/Me1onRind/go-demo/internal/core/common"
+	"github.com/Me1onRind/go-demo/internal/core/middleware"
 	"github.com/Me1onRind/go-demo/protobuf/pb"
-	"go.etcd.io/etcd/client/v3"
+	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
+	clientv3 "go.etcd.io/etcd/client/v3"
 	"go.etcd.io/etcd/client/v3/naming/resolver"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/status"
 )
 
-var c pb.FooClient
+var (
+	c         pb.FooClient
+	commonCtx = common.NewContext(context.Background())
+)
 
 func TestMain(m *testing.M) {
 	cli, err := clientv3.NewFromURL("http://localhost:2379")
@@ -26,7 +32,12 @@ func TestMain(m *testing.M) {
 	conn, err := grpc.Dial("etcd:///service/go-demo",
 		grpc.WithResolvers(builder),
 		grpc.WithBalancerName("round_robin"),
-		grpc.WithInsecure(), grpc.WithTimeout(time.Second))
+		grpc.WithInsecure(), grpc.WithTimeout(time.Second),
+		grpc.WithChainUnaryInterceptor(grpc_middleware.ChainUnaryClient(
+			middleware.ClientRetry(1),
+			middleware.ClientLogger(),
+		)),
+	)
 	if err != nil {
 		panic(err)
 	}
@@ -35,7 +46,8 @@ func TestMain(m *testing.M) {
 }
 
 func Test_Greet(t *testing.T) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*2)
+	t.Skip()
+	ctx, cancel := context.WithTimeout(commonCtx, time.Second*2)
 	defer cancel()
 	resp, err := c.Greet(ctx, &pb.GreetReq{
 		MyName: "Bar",
@@ -48,7 +60,7 @@ func Test_Greet(t *testing.T) {
 }
 
 func Test_ErrorResult(t *testing.T) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*2)
+	ctx, cancel := context.WithTimeout(commonCtx, time.Second*2)
 	defer cancel()
 	_, err := c.ErrorResult(ctx, &pb.Empty{})
 	if err != nil {
@@ -63,4 +75,11 @@ func Test_ErrorResult(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
+}
+
+func Test_PanicResult(t *testing.T) {
+	ctx, cancel := context.WithTimeout(commonCtx, time.Second*2)
+	defer cancel()
+	_, err := c.PanicResult(ctx, &pb.Empty{})
+	t.Log(err)
 }

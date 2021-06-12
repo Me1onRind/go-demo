@@ -150,18 +150,18 @@ func init() {
 func init() { proto.RegisterFile("foo.proto", fileDescriptor_7ce1e2eec643ca48) }
 
 var fileDescriptor_7ce1e2eec643ca48 = []byte{
-	// 165 bytes of a gzipped FileDescriptorProto
+	// 175 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xe2, 0xe2, 0x4c, 0xcb, 0xcf, 0xd7,
 	0x2b, 0x28, 0xca, 0x2f, 0xc9, 0x17, 0x62, 0x2a, 0x48, 0x52, 0x32, 0xe5, 0xe2, 0x70, 0x2f, 0x4a,
 	0x4d, 0x2d, 0x09, 0x4a, 0x2d, 0x14, 0x12, 0xe7, 0x62, 0xcf, 0xad, 0x8c, 0xcf, 0x4b, 0xcc, 0x4d,
 	0x95, 0x60, 0x54, 0x60, 0xd4, 0xe0, 0x0c, 0x62, 0xcb, 0xad, 0xf4, 0x4b, 0xcc, 0x4d, 0x15, 0x12,
 	0xe0, 0x62, 0xce, 0x2d, 0x4e, 0x97, 0x60, 0x02, 0x0b, 0x82, 0x98, 0x4a, 0xb2, 0x5c, 0x9c, 0x50,
 	0x6d, 0xc5, 0x05, 0x30, 0x69, 0x46, 0x84, 0x34, 0x3b, 0x17, 0xab, 0x6b, 0x6e, 0x41, 0x49, 0xa5,
-	0x51, 0x00, 0x17, 0xb3, 0x5b, 0x7e, 0xbe, 0x90, 0x0a, 0x17, 0x2b, 0x58, 0xb9, 0x10, 0x8f, 0x5e,
+	0x51, 0x29, 0x17, 0xb3, 0x5b, 0x7e, 0xbe, 0x90, 0x0a, 0x17, 0x2b, 0x58, 0xb9, 0x10, 0x8f, 0x5e,
 	0x41, 0x92, 0x1e, 0xcc, 0x42, 0x29, 0x5e, 0x24, 0x5e, 0x71, 0x81, 0x90, 0x32, 0x17, 0xb7, 0x6b,
 	0x51, 0x51, 0x7e, 0x51, 0x50, 0x6a, 0x71, 0x69, 0x4e, 0x89, 0x10, 0x27, 0x48, 0x16, 0x6c, 0x8c,
-	0x14, 0x82, 0x99, 0xc4, 0x06, 0x76, 0xbb, 0x31, 0x20, 0x00, 0x00, 0xff, 0xff, 0xcb, 0x53, 0x38,
-	0x19, 0xc8, 0x00, 0x00, 0x00,
+	0x14, 0x82, 0x09, 0x52, 0x14, 0x90, 0x98, 0x97, 0x99, 0x8c, 0x4f, 0x51, 0x12, 0x1b, 0xd8, 0x83,
+	0xc6, 0x80, 0x00, 0x00, 0x00, 0xff, 0xff, 0xf8, 0x95, 0x6b, 0x12, 0xed, 0x00, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -178,6 +178,7 @@ const _ = grpc.SupportPackageIsVersion6
 type FooClient interface {
 	Greet(ctx context.Context, in *GreetReq, opts ...grpc.CallOption) (*GreetResp, error)
 	ErrorResult(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Empty, error)
+	PanicResult(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Empty, error)
 }
 
 type fooClient struct {
@@ -206,10 +207,20 @@ func (c *fooClient) ErrorResult(ctx context.Context, in *Empty, opts ...grpc.Cal
 	return out, nil
 }
 
+func (c *fooClient) PanicResult(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Empty, error) {
+	out := new(Empty)
+	err := c.cc.Invoke(ctx, "/pb.Foo/PanicResult", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // FooServer is the server API for Foo service.
 type FooServer interface {
 	Greet(context.Context, *GreetReq) (*GreetResp, error)
 	ErrorResult(context.Context, *Empty) (*Empty, error)
+	PanicResult(context.Context, *Empty) (*Empty, error)
 }
 
 // UnimplementedFooServer can be embedded to have forward compatible implementations.
@@ -221,6 +232,9 @@ func (*UnimplementedFooServer) Greet(ctx context.Context, req *GreetReq) (*Greet
 }
 func (*UnimplementedFooServer) ErrorResult(ctx context.Context, req *Empty) (*Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ErrorResult not implemented")
+}
+func (*UnimplementedFooServer) PanicResult(ctx context.Context, req *Empty) (*Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PanicResult not implemented")
 }
 
 func RegisterFooServer(s *grpc.Server, srv FooServer) {
@@ -263,6 +277,24 @@ func _Foo_ErrorResult_Handler(srv interface{}, ctx context.Context, dec func(int
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Foo_PanicResult_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FooServer).PanicResult(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/pb.Foo/PanicResult",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FooServer).PanicResult(ctx, req.(*Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _Foo_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "pb.Foo",
 	HandlerType: (*FooServer)(nil),
@@ -274,6 +306,10 @@ var _Foo_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ErrorResult",
 			Handler:    _Foo_ErrorResult_Handler,
+		},
+		{
+			MethodName: "PanicResult",
+			Handler:    _Foo_PanicResult_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

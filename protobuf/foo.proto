@@ -5,6 +5,7 @@ package pb;
 service Foo {
     rpc Greet(GreetReq) returns (GreetResp);
     rpc ErrorResult(Empty) returns (Empty);
+    rpc PanicResult(Empty) returns (Empty);
 }
 
 message GreetReq {

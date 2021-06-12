@@ -26,3 +26,7 @@ func (f *FooController) Greet(ctx context.Context, in *pb.GreetReq) (*pb.GreetRe
 func (f *FooController) ErrorResult(ctx context.Context, in *pb.Empty) (*pb.Empty, error) {
 	return nil, err_code.ServerInternalError.GrpcErr()
 }
+
+func (f *FooController) PanicResult(ctx context.Context, in *pb.Empty) (*pb.Empty, error) {
+	panic("no implement")
+}
