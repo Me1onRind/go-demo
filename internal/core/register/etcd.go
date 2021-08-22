@@ -9,6 +9,8 @@ import (
 	uuid "github.com/satori/go.uuid"
 	clientv3 "go.etcd.io/etcd/client/v3"
 	"go.etcd.io/etcd/client/v3/naming/endpoints"
+	"go.etcd.io/etcd/client/v3/naming/resolver"
+	gresolver "google.golang.org/grpc/resolver"
 )
 
 var client *clientv3.Client
@@ -20,8 +22,11 @@ const (
 func init() {
 	var err error
 	client, err = clientv3.New(clientv3.Config{
-		Endpoints:   []string{"localhost:2379"},
-		DialTimeout: 5 * time.Second,
+		Endpoints: []string{
+			"localhost:2379",
+		},
+		DialTimeout:       time.Second * 5,
+		DialKeepAliveTime: time.Second * 5,
 	})
 	if err != nil {
 		panic(err)
@@ -29,6 +34,7 @@ func init() {
 }
 
 func Register(ctx context.Context, serviceName, addr string) error {
+	log.Println("Try register to etcd ...")
 	// 创建一个租约
 	lease := clientv3.NewLease(client)
 	cancelCtx, cancel := context.WithTimeout(ctx, time.Second*3)
@@ -55,8 +61,20 @@ func Register(ctx context.Context, serviceName, addr string) error {
 	}, clientv3.WithLease(leaseResp.ID)); err != nil {
 		return err
 	}
+	log.Println("Register etcd success")
+
+	del := func() {
+		log.Println("Register close")
+
+		cancelCtx, cancel = context.WithTimeout(ctx, time.Second*3)
+		defer cancel()
+		em.DeleteEndpoint(cancelCtx, serviceName)
+
+		lease.Close()
+	}
 
 	go func() {
+		failedCount := 0
 		for {
 			select {
 			case resp := <-leaseChannel:
@@ -64,17 +82,19 @@ func Register(ctx context.Context, serviceName, addr string) error {
 					//log.Println("keep alive success.")
 				} else {
 					log.Println("keep alive failed.")
-					time.Sleep(time.Second)
+					failedCount++
+					for failedCount > 3 {
+						del()
+						if err := Register(ctx, serviceName, addr); err != nil {
+							time.Sleep(time.Second)
+							continue
+						}
+						return
+					}
 					continue
 				}
 			case <-ctx.Done():
-				log.Println("close service register")
-
-				cancelCtx, cancel = context.WithTimeout(ctx, time.Second*3)
-				defer cancel()
-				em.DeleteEndpoint(cancelCtx, serviceName)
-
-				lease.Close()
+				del()
 				client.Close()
 				return
 			}
@@ -82,4 +102,12 @@ func Register(ctx context.Context, serviceName, addr string) error {
 	}()
 
 	return nil
+}
+
+func DialTarget(serviceName string) string {
+	return fmt.Sprintf("etcd:///%s/%s", prefix, serviceName)
+}
+
+func GrpcResolvers() (gresolver.Builder, error) {
+	return resolver.NewBuilder(client)
 }

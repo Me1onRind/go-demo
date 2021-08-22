@@ -8,7 +8,7 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-var errcodes = map[int32]struct{}{}
+var errcodes = map[int32]*Error{}
 
 type Error struct {
 	Code     int32
@@ -22,11 +22,13 @@ func NewError(code int32, message string, grpcCode codes.Code) *Error {
 		panic(fmt.Sprintf("Error code:%d exist", code))
 	}
 
-	return &Error{
+	e := &Error{
 		Code:     code,
 		Message:  message,
 		grpcCode: grpcCode,
 	}
+	errcodes[code] = e
+	return e
 }
 
 func (e *Error) clone() *Error {
@@ -54,8 +56,8 @@ func (e *Error) Withf(format string, v ...interface{}) *Error {
 	return e.With(fmt.Sprintf(format, v...))
 }
 
-func (e *Error) WithErr(err error) {
-	e.Param = err.Error()
+func (e *Error) WithErr(err error) *Error {
+	return e.With(err.Error())
 }
 
 func (e *Error) GrpcErr() error {
@@ -68,4 +70,12 @@ func (e *Error) GrpcErr() error {
 		panic(err)
 	}
 	return s.Err()
+}
+
+func GetErrorByCode(code int32) *Error {
+	if e, ok := errcodes[code]; ok {
+		return e
+	}
+
+	return nil
 }

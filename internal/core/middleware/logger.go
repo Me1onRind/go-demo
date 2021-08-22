@@ -1,10 +1,13 @@
 package middleware
 
 import (
+	"bytes"
 	"context"
+	"io/ioutil"
 	"time"
 
 	"github.com/Me1onRind/go-demo/internal/core/common"
+	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 )
@@ -23,18 +26,47 @@ func GrpcLogger() grpc.UnaryServerInterceptor {
 	}
 }
 
-func ClientLogger() grpc.UnaryClientInterceptor {
-	return func(ctx context.Context, method string, req, reply interface{}, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
-		var err error
-		begin := time.Now()
+func GinLogger() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		ctx := common.GetContext(c)
+		var request []byte
+
+		contentType := c.ContentType()
+		if contentType == "application/json" || contentType == "text/plain" {
+			var err error
+			request, err = c.GetRawData()
+			if err != nil {
+				ctx.Logger.Error("Get request body error", zap.Error(err))
+			}
+			c.Request.Body = ioutil.NopCloser(bytes.NewBuffer(request))
+		}
+
+		lw := &logWriter{
+			ResponseWriter: c.Writer,
+			buff:           &bytes.Buffer{},
+		}
+		c.Writer = lw
+
+		start := time.Now()
 		defer func() {
-			commonCtx := common.GetContext(ctx)
-			commonCtx.Logger.Info("grpc request",
-				zap.String("method", method), zap.Reflect("req", req), zap.Reflect("reply", reply),
-				zap.Duration("cost", time.Since(begin)), zap.Error(err),
+			end := time.Now()
+			ctx.Logger.Info("access log",
+				zap.String("proto", c.Request.Proto), zap.String("method", c.Request.Method), zap.String("path", c.Request.URL.Path), zap.String("rawQuery", c.Request.URL.RawQuery),
+				zap.String("reqBody", string(request)), zap.String("clientIP", c.ClientIP()), zap.String("resp", lw.buff.String()), zap.Duration("cost", end.Sub(start)),
 			)
 		}()
-		err = invoker(ctx, method, req, reply, cc, opts...)
-		return err
+
+		c.Next()
+
 	}
+}
+
+type logWriter struct {
+	gin.ResponseWriter
+	buff *bytes.Buffer
+}
+
+func (w *logWriter) Write(b []byte) (int, error) {
+	w.buff.Write(b)
+	return w.ResponseWriter.Write(b)
 }
