@@ -18,7 +18,7 @@ func GrpcLogger() grpc.UnaryServerInterceptor {
 		defer func() {
 			commonCtx := common.GetContext(ctx)
 			commonCtx.Logger.Info("access request", zap.Reflect("req", req), zap.Reflect("resp", resp),
-				zap.String("method", info.FullMethod), zap.Duration("cost", time.Since(begin)),
+				zap.String("method", info.FullMethod), zap.Error(err), zap.Duration("cost", time.Since(begin)),
 			)
 		}()
 		resp, err = handler(ctx, req)

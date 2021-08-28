@@ -15,4 +15,6 @@ require (
 	go.etcd.io/etcd/client/v3 v3.5.0-rc.0
 	go.uber.org/zap v1.17.0
 	google.golang.org/grpc v1.38.0
+	gorm.io/driver/mysql v1.1.2
+	gorm.io/gorm v1.21.14
 )

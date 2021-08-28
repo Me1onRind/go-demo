@@ -65,7 +65,7 @@ func (e *Error) GrpcErr() error {
 		Code:    e.Code,
 		Message: e.String(),
 	}
-	s, err := status.New(e.grpcCode, pbErr.Message).WithDetails(pbErr)
+	s, err := status.New(e.grpcCode, fmt.Sprintf("Code[%d],Msg[%s]", pbErr.Code, pbErr.Message)).WithDetails(pbErr)
 	if err != nil {
 		panic(err)
 	}

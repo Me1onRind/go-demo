@@ -46,7 +46,7 @@ func Test_ErrorResult(t *testing.T) {
 			details := s.Details()
 			if len(details) > 0 {
 				if e, ok := details[0].(*pb.Error); ok {
-					t.Log(e.Code, e.Message)
+					t.Logf("pb return code:%d, msg:%s\n", e.Code, e.Message)
 				}
 			}
 		} else {

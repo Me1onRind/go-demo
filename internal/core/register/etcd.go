@@ -72,7 +72,12 @@ func Register(ctx context.Context, serviceName, addr string) error {
 
 		lease.Close()
 	}
+	keepRegister(ctx, leaseChannel, del, serviceName, addr)
 
+	return nil
+}
+
+func keepRegister(ctx context.Context, leaseChannel <-chan *clientv3.LeaseKeepAliveResponse, cleanFunc func(), serviceName, addr string) {
 	go func() {
 		failedCount := 0
 		for {
@@ -84,7 +89,7 @@ func Register(ctx context.Context, serviceName, addr string) error {
 					log.Println("keep alive failed.")
 					failedCount++
 					for failedCount > 3 {
-						del()
+						cleanFunc()
 						if err := Register(ctx, serviceName, addr); err != nil {
 							time.Sleep(time.Second)
 							continue
@@ -94,14 +99,12 @@ func Register(ctx context.Context, serviceName, addr string) error {
 					continue
 				}
 			case <-ctx.Done():
-				del()
+				cleanFunc()
 				client.Close()
 				return
 			}
 		}
 	}()
-
-	return nil
 }
 
 func DialTarget(serviceName string) string {
