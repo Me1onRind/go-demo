@@ -3,7 +3,6 @@ package store
 import (
 	"context"
 	"fmt"
-	"os"
 	"testing"
 	"time"
 
@@ -21,20 +20,16 @@ func (t *TestTab) TableName() string {
 	return "test_tab"
 }
 
-var db *gorm.DB
-
-func TestMain(m *testing.M) {
-	var err error
+func newTestDB() (*gorm.DB, error) {
 	dns := "me1onrind:guapi123@tcp(172.31.1.100:3306)/go-frame?charset=utf8mb4&parseTime=True&loc=Local"
-	db, err = NewConnectPool(dns)
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-	os.Exit(m.Run())
+	return NewConnectPool(dns)
 }
 
 func Test_Create(t *testing.T) {
+	db, err := newTestDB()
+	if err != nil {
+		t.Fatal(err)
+	}
 	testTab := &TestTab{
 		Name: fmt.Sprintf("%s_%d", "test", time.Now().Unix()),
 	}
@@ -44,6 +39,10 @@ func Test_Create(t *testing.T) {
 }
 
 func Test_Update(t *testing.T) {
+	db, err := newTestDB()
+	if err != nil {
+		t.Fatal(err)
+	}
 	testTab := &TestTab{}
 	if err := db.WithContext(context.Background()).Model(testTab).Where("id = ?", 1).Update("name", "test").Error; err != nil {
 		t.Fatal(err)
@@ -51,6 +50,10 @@ func Test_Update(t *testing.T) {
 }
 
 func Test_Select(t *testing.T) {
+	db, err := newTestDB()
+	if err != nil {
+		t.Fatal(err)
+	}
 	testTab := &TestTab{}
 	if err := db.WithContext(context.Background()).Where("id = ?", 1).Find(testTab).Error; err != nil {
 		t.Fatal(err)
