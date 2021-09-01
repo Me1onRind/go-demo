@@ -1,6 +1,7 @@
 package store
 
 import (
+	"database/sql"
 	"time"
 
 	"gorm.io/driver/mysql"
@@ -8,8 +9,18 @@ import (
 	"gorm.io/gorm/logger"
 )
 
-func NewConnectPool(dns string) (*gorm.DB, error) {
-	db, err := gorm.Open(mysql.Open(dns), &gorm.Config{
+func NewDBConnectPool(dns string) (*gorm.DB, error) {
+	return doCreateDBConnectPool(mysql.Open(dns))
+}
+
+func NewDBConnectPoolFRromDB(db *sql.DB) (*gorm.DB, error) {
+	return doCreateDBConnectPool(mysql.New(mysql.Config{
+		Conn: db,
+	}))
+}
+
+func doCreateDBConnectPool(dial gorm.Dialector) (*gorm.DB, error) {
+	db, err := gorm.Open(dial, &gorm.Config{
 		Logger: logger.Default.LogMode(logger.Info),
 	})
 	if err != nil {

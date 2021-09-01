@@ -71,11 +71,3 @@ func (e *Error) GrpcErr() error {
 	}
 	return s.Err()
 }
-
-func GetErrorByCode(code int32) *Error {
-	if e, ok := errcodes[code]; ok {
-		return e
-	}
-
-	return nil
-}

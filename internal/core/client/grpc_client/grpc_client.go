@@ -32,9 +32,6 @@ func ResolveGoDemoGrpcError(err error) *common.Error {
 		details := s.Details()
 		if len(details) > 0 {
 			if e, ok := details[0].(*pb.Error); ok {
-				if result := common.GetErrorByCode(e.Code); result != nil {
-					return result
-				}
 				return err_code.GoDemoCommonFailedError.Withf("remote code:%d, message:%s", e.Code, e.Message)
 			}
 		}

@@ -4,24 +4,21 @@ import (
 	"context"
 	"testing"
 
-	"github.com/go-redis/redis/v8"
+	"github.com/alicebob/miniredis/v2"
+	"github.com/stretchr/testify/assert"
 )
 
-func Test_Set(t *testing.T) {
-	r := NewRedisPool("localhost:6379")
+func Test_Set_Get(t *testing.T) {
+	s, err := miniredis.Run()
+	assert.Empty(t, err)
+	defer s.Close()
+	r := NewRedisPool(s.Addr())
 	ctx := context.Background()
-	err := r.Set(ctx, "test:key", "value", 0).Err()
-	if err != nil {
-		t.Fatal(err)
-	}
-}
-
-func Test_Get(t *testing.T) {
-	r := NewRedisPool("localhost:6379")
-	ctx := context.Background()
+	err = r.Set(ctx, "test:key", "value", 0).Err()
+	assert.Empty(t, err)
 	val, err := r.Get(ctx, "test:key").Result()
-	if err != nil && err != redis.Nil {
-		t.Fatal(err)
+	if assert.Empty(t, err) {
+		t.Log(val)
+		assert.Equal(t, "value", val)
 	}
-	t.Log(val)
 }
