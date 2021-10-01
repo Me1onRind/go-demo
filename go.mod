@@ -10,6 +10,7 @@ require (
 	github.com/go-redis/redis/v8 v8.11.3
 	github.com/golang/protobuf v1.5.2
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0
+	github.com/hibiken/asynq v0.18.5
 	github.com/json-iterator/go v1.1.9
 	github.com/opentracing/opentracing-go v1.1.0
 	github.com/satori/go.uuid v1.2.0

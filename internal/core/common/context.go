@@ -18,7 +18,7 @@ const (
 	cKey = "cmtx"
 )
 
-func init() {
+func Init() {
 	config := zap.NewProductionEncoderConfig()
 	config.EncodeDuration = zapcore.MillisDurationEncoder
 	config.EncodeTime = zapcore.ISO8601TimeEncoder
