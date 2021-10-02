@@ -1,8 +1,6 @@
 package gateway
 
 import (
-	"reflect"
-
 	"github.com/Me1onRind/go-demo/internal/core/common"
 	"github.com/Me1onRind/go-demo/internal/err_code"
 	"github.com/gin-gonic/gin"
@@ -43,17 +41,5 @@ func JSON(handler HTTPHandler, paramType interface{}) gin.HandlerFunc {
 			err = err_code.SUCCESS
 		}
 		response = NewJSONResponse(err, data)
-	}
-}
-
-func parserProtocol(paramType interface{}) interface{} {
-	valueType := reflect.TypeOf(paramType)
-	switch valueType.Kind() {
-	case reflect.Ptr:
-		return reflect.New(valueType.Elem()).Interface()
-	case reflect.Struct:
-		return reflect.New(valueType).Interface()
-	default:
-		return nil
 	}
 }

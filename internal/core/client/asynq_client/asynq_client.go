@@ -10,6 +10,7 @@ var (
 
 func InitAsynqClient(addr string) {
 	AsynqClient = asynq.NewClient(asynq.RedisClientOpt{
-		Addr: addr,
+		Network: "tcp",
+		Addr:    addr,
 	})
 }
