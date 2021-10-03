@@ -18,6 +18,7 @@ import (
 func Init() {
 	initFuncs := []func() error{
 		initialize.InitOpentracking("go-grpc-demo", "0.0.1"),
+		initialize.InitLogger,
 	}
 
 	for _, v := range initFuncs {

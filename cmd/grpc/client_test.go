@@ -7,6 +7,7 @@ import (
 
 	"github.com/Me1onRind/go-demo/internal/core/client/grpc_client"
 	"github.com/Me1onRind/go-demo/internal/core/common"
+	"github.com/Me1onRind/go-demo/internal/core/initialize"
 	"github.com/Me1onRind/go-demo/protobuf/pb"
 	"google.golang.org/grpc/status"
 )
@@ -17,6 +18,7 @@ var (
 )
 
 func TestMain(m *testing.M) {
+	initialize.InitLogger()
 	if err := grpc_client.InitGoDemoClient(); err != nil {
 		return
 	}
