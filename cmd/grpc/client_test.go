@@ -14,36 +14,37 @@ import (
 )
 
 var (
-	c         pb.FooClient
-	commonCtx = common.NewContext(context.Background())
+	commonCtx *common.Context
 )
 
 func TestMain(m *testing.M) {
-	initialize.InitLogger()
+	_ = initialize.InitLogger()
+	commonCtx = common.NewContext(context.Background())
 	if err := grpc_client.InitGoDemoClient(); err != nil {
 		return
 	}
-	c = grpc_client.FooClient
 	os.Exit(m.Run())
 }
 
 func Test_Greet(t *testing.T) {
-	ctx, cancel := context.WithTimeout(commonCtx, time.Second*2)
-	defer cancel()
-	resp, err := c.Greet(ctx, &pb.GreetReq{
-		MyName: "Bar",
-		Msg:    "Hello, World",
-	})
-	if err != nil {
-		t.Fatal(err)
+	for i := 0; i < 100; i++ {
+		ctx, cancel := context.WithTimeout(commonCtx, time.Second*2)
+		defer cancel()
+		resp, err := grpc_client.FooClient.Greet(ctx, &pb.GreetReq{
+			MyName: "Bar",
+			Msg:    "Hello, World",
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+		t.Log(resp.Msg)
 	}
-	t.Log(resp.Msg)
 }
 
 func Test_ErrorResult(t *testing.T) {
 	ctx, cancel := context.WithTimeout(commonCtx, time.Second*2)
 	defer cancel()
-	_, err := c.ErrorResult(ctx, &pb.Empty{})
+	_, err := grpc_client.FooClient.ErrorResult(ctx, &pb.Empty{})
 	if err != nil {
 		if s, ok := status.FromError(err); ok {
 			details := s.Details()
@@ -61,6 +62,6 @@ func Test_ErrorResult(t *testing.T) {
 func Test_PanicResult(t *testing.T) {
 	ctx, cancel := context.WithTimeout(commonCtx, time.Second*2)
 	defer cancel()
-	_, err := c.PanicResult(ctx, &pb.Empty{})
+	_, err := grpc_client.FooClient.PanicResult(ctx, &pb.Empty{})
 	t.Log(err)
 }

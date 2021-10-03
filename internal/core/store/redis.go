@@ -8,7 +8,7 @@ import (
 )
 
 var (
-	redisPool *redis.Client
+	RedisPool *redis.Client
 )
 
 type redisHook struct {

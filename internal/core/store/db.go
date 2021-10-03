@@ -9,6 +9,11 @@ import (
 	"gorm.io/gorm/logger"
 )
 
+var (
+	DB       *gorm.DB
+	ConfigDB *gorm.DB
+)
+
 func NewDBConnectPool(dns string) (*gorm.DB, error) {
 	return doCreateDBConnectPool(mysql.Open(dns))
 }
@@ -21,7 +26,8 @@ func NewDBConnectPoolFRromDB(db *sql.DB) (*gorm.DB, error) {
 
 func doCreateDBConnectPool(dial gorm.Dialector) (*gorm.DB, error) {
 	db, err := gorm.Open(dial, &gorm.Config{
-		Logger: logger.Default.LogMode(logger.Info),
+		//Logger: logger.Default.LogMode(logger.Info),
+		Logger: logger.Default.LogMode(logger.Silent),
 	})
 	if err != nil {
 		return nil, err

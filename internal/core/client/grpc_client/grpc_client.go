@@ -49,8 +49,10 @@ func getGrpcConn(serviceName string) (*grpc.ClientConn, error) {
 	ctx, cancel := context.WithTimeout(context.TODO(), time.Second*2)
 	defer cancel()
 
+	policy := `{"loadBalancingPolicy":"round_robin"}`
 	conn, err := grpc.DialContext(ctx, register.DialTarget(serviceName),
 		grpc.WithResolvers(resolver),
+		grpc.WithDefaultServiceConfig(policy),
 		grpc.WithInsecure(),
 		grpc.WithChainUnaryInterceptor(grpc_middleware.ChainUnaryClient(
 			withRetry(1, retryOnlyByCode(codes.Unavailable)),

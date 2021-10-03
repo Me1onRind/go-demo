@@ -9,6 +9,7 @@ import (
 
 func Init() {
 	funcs := []func() error{
+		initialize.InitLogger,
 		initialize.InitOpentracking("go-http-demo", "0.0.1"),
 		initialize.InitGrpcClients,
 	}

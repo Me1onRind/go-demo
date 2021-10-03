@@ -14,6 +14,9 @@ const (
 	JsonEncodeFailed    = 10003
 	JsonDecodeFailed    = 10004
 	AsyncTaskSendFailed = 10005
+	ReadDBFailed        = 10006
+	WriteDBFailed       = 10007
+	SetLocalCacheFailed = 10008
 
 	GoDemoCommonFailed = 20001
 )
@@ -27,6 +30,9 @@ var (
 	JsonEncodeError     = common.NewError(JsonEncodeFailed, "Json Encode Failed", codes.Aborted)
 	JsonDecodeError     = common.NewError(JsonDecodeFailed, "Json Decode Failed", codes.Aborted)
 	AsyncTaskSendError  = common.NewError(AsyncTaskSendFailed, "Async Task Send Failed", codes.Unavailable)
+	ReadDBError         = common.NewError(ReadDBFailed, "Read DB Failed", codes.Unavailable)
+	WriteDBError        = common.NewError(WriteDBFailed, "Write DB Failed", codes.Unavailable)
+	SetLocalCacheError  = common.NewError(SetLocalCacheFailed, "Write DB Failed", codes.Unavailable)
 
 	GoDemoCommonFailedError = common.NewError(GoDemoCommonFailed, "Call Go-demo Failed", codes.Aborted)
 )

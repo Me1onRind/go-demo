@@ -3,14 +3,11 @@ package main
 import (
 	"github.com/Me1onRind/go-demo/internal/constant/task"
 	"github.com/Me1onRind/go-demo/internal/core/gateway"
-	"github.com/Me1onRind/go-demo/internal/task/demo_task"
+	"github.com/Me1onRind/go-demo/internal/lib/task/demo_task"
 	"github.com/hibiken/asynq"
 )
 
 //"github.com/Me1onRind/go-demo/internal/core/initialize"
-
-func Init() {
-}
 
 func main() {
 	srv := asynq.NewServer(
