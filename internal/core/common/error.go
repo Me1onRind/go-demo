@@ -1,6 +1,7 @@
 package common
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/Me1onRind/go-demo/protobuf/pb"
@@ -70,4 +71,8 @@ func (e *Error) GrpcErr() error {
 		panic(err)
 	}
 	return s.Err()
+}
+
+func (e *Error) GenError() error {
+	return errors.New(e.String())
 }

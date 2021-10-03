@@ -7,6 +7,10 @@ import (
 	"github.com/go-redis/redis/v8"
 )
 
+var (
+	redisPool *redis.Client
+)
+
 type redisHook struct {
 }
 
