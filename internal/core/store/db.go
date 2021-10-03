@@ -62,6 +62,7 @@ func setMTime(db *gorm.DB) {
 func tracingStart() func(*gorm.DB) {
 	return func(db *gorm.DB) {
 		if db.Statement.Context != nil {
+			return
 		}
 	}
 }
@@ -69,6 +70,7 @@ func tracingStart() func(*gorm.DB) {
 func tracingEnd() func(*gorm.DB) {
 	return func(db *gorm.DB) {
 		if db.Statement.Context != nil {
+			return
 		}
 	}
 }

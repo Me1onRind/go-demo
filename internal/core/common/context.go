@@ -9,8 +9,10 @@ import (
 	"go.uber.org/zap"
 )
 
+type contextKey string
+
 const (
-	cKey = "cmtx"
+	cKey contextKey = "cmtx"
 )
 
 type Context struct {
@@ -34,7 +36,7 @@ func GetContext(c context.Context) *Context {
 func storeContext(c context.Context, ctx *Context) context.Context {
 	switch v := c.(type) {
 	case *gin.Context:
-		v.Set(cKey, ctx)
+		v.Set(string(cKey), ctx)
 		return c
 	default:
 		return context.WithValue(c, cKey, ctx)

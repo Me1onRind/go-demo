@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"os"
 	"testing"
 	"time"
 
@@ -23,7 +24,7 @@ func TestMain(m *testing.M) {
 		return
 	}
 	c = grpc_client.FooClient
-	m.Run()
+	os.Exit(m.Run())
 }
 
 func Test_Greet(t *testing.T) {
