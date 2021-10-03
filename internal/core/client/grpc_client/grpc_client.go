@@ -1,6 +1,7 @@
 package grpc_client
 
 import (
+	"context"
 	"time"
 
 	"github.com/Me1onRind/go-demo/internal/core/common"
@@ -45,10 +46,12 @@ func getGrpcConn(serviceName string) (*grpc.ClientConn, error) {
 		return nil, err
 	}
 
-	conn, err := grpc.Dial(register.DialTarget(serviceName),
+	ctx, cancel := context.WithTimeout(context.TODO(), time.Second*2)
+	defer cancel()
+
+	conn, err := grpc.DialContext(ctx, register.DialTarget(serviceName),
 		grpc.WithResolvers(resolver),
-		grpc.WithBalancerName("round_robin"),
-		grpc.WithInsecure(), grpc.WithTimeout(time.Second),
+		grpc.WithInsecure(),
 		grpc.WithChainUnaryInterceptor(grpc_middleware.ChainUnaryClient(
 			withRetry(1, retryOnlyByCode(codes.Unavailable)),
 			withTimeout(time.Second*1),

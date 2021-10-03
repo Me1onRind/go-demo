@@ -68,7 +68,7 @@ func Register(ctx context.Context, serviceName, addr string) error {
 
 		cancelCtx, cancel = context.WithTimeout(ctx, time.Second*3)
 		defer cancel()
-		em.DeleteEndpoint(cancelCtx, serviceName)
+		_ = em.DeleteEndpoint(cancelCtx, serviceName)
 
 		lease.Close()
 	}

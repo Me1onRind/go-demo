@@ -31,5 +31,7 @@ func main() {
 		middleware.GinLogger(),
 	)
 	router.SetFooRouter(apiGroup)
-	r.Run("0.0.0.0:8081")
+	if err := r.Run("0.0.0.0:8081"); err != nil {
+		panic(err)
+	}
 }
