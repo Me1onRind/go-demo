@@ -3,18 +3,23 @@ package initialize
 import (
 	"time"
 
+	"github.com/Me1onRind/go-demo/internal/core/config"
 	"github.com/Me1onRind/go-demo/internal/core/store"
 	"github.com/bluele/gcache"
 )
 
 func InitDB() error {
 	var err error
-	store.DB, err = store.NewDBConnectPool("root:guapi123@tcp(localhost:3306)/go-frame")
+	dbs := config.RemoteConfig.DBs
+	store.DB, err = store.NewDBPool(&dbs.DB)
 	if err != nil {
 		return err
 	}
-	store.ConfigDB, err = store.NewDBConnectPool("root:guapi123@tcp(localhost:3306)/config")
-	return err
+	store.ConfigDB, err = store.NewDBPool(&dbs.ConfigDB)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func InitLocalCache() error {

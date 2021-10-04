@@ -2,8 +2,10 @@ package store
 
 import (
 	"context"
+	"fmt"
 	"time"
 
+	"github.com/Me1onRind/go-demo/internal/core/config"
 	"github.com/go-redis/redis/v8"
 )
 
@@ -30,15 +32,25 @@ func (r *redisHook) AfterProcessPipeline(ctx context.Context, cmds []redis.Cmder
 	return nil
 }
 
-func NewRedisPool(addr string) *redis.Client {
+func NewRedisPoolFromAddr(addr string) *redis.Client {
+	client := redis.NewClient(&redis.Options{
+		Network: "tcp",
+		Addr:    addr,
+		DB:      0,
+	})
+	client.AddHook(&redisHook{})
+	return client
+}
+
+func NewRedisPool(cfg *config.RedisConfig) *redis.Client {
 	client := redis.NewClient(&redis.Options{
 		Network:      "tcp",
-		Addr:         addr,
-		ReadTimeout:  time.Millisecond * 500,
-		WriteTimeout: time.Millisecond * 500,
-		PoolSize:     5,
-		MinIdleConns: 0,
-		IdleTimeout:  time.Second * 5,
+		Addr:         fmt.Sprintf("%s:%d", cfg.Host, cfg.Port),
+		ReadTimeout:  time.Millisecond * cfg.ReadTimeout,
+		WriteTimeout: time.Millisecond * cfg.WriteTimeout,
+		PoolSize:     cfg.PoolSize,
+		MinIdleConns: cfg.MinIdleConns,
+		IdleTimeout:  time.Second * cfg.IdleTimeout,
 		DB:           0,
 	})
 	client.AddHook(&redisHook{})

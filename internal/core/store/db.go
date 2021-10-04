@@ -2,8 +2,10 @@ package store
 
 import (
 	"database/sql"
+	"fmt"
 	"time"
 
+	"github.com/Me1onRind/go-demo/internal/core/config"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -14,21 +16,16 @@ var (
 	ConfigDB *gorm.DB
 )
 
-func NewDBConnectPool(dns string) (*gorm.DB, error) {
-	return doCreateDBConnectPool(mysql.Open(dns))
+func NewDBPoolFromDsn(dsn string) (*gorm.DB, error) {
+	return doCreateDBPool(mysql.Open(dsn))
 }
 
-func NewDBConnectPoolFRromDB(db *sql.DB) (*gorm.DB, error) {
-	return doCreateDBConnectPool(mysql.New(mysql.Config{
-		Conn: db,
-	}))
-}
+func NewDBPool(cfg *config.MysqlConfig) (*gorm.DB, error) {
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?timeout=%s&readTimeout=%s&writeTimeout=%s",
+		cfg.Username, cfg.Password, cfg.Host, cfg.Port, cfg.DBName, cfg.Timeout, cfg.ReadTimeout, cfg.WriteTimeout)
+	dail := mysql.Open(dsn)
 
-func doCreateDBConnectPool(dial gorm.Dialector) (*gorm.DB, error) {
-	db, err := gorm.Open(dial, &gorm.Config{
-		//Logger: logger.Default.LogMode(logger.Info),
-		Logger: logger.Default.LogMode(logger.Silent),
-	})
+	db, err := doCreateDBPool(dail)
 	if err != nil {
 		return nil, err
 	}
@@ -38,10 +35,27 @@ func doCreateDBConnectPool(dial gorm.Dialector) (*gorm.DB, error) {
 		return nil, err
 	}
 
-	sqlDB.SetMaxIdleConns(5)
-	sqlDB.SetMaxOpenConns(10)
-	sqlDB.SetConnMaxIdleTime(time.Second * 10)
-	sqlDB.SetConnMaxLifetime(time.Minute * 3)
+	sqlDB.SetMaxIdleConns(cfg.MaxIdleConns)
+	sqlDB.SetMaxOpenConns(cfg.MaxOpenConns)
+	sqlDB.SetConnMaxIdleTime(time.Second * cfg.MaxIdleTime)
+	sqlDB.SetConnMaxLifetime(time.Second * cfg.MaxLifetime)
+	return db, nil
+}
+
+func NewDBPoolFromDB(db *sql.DB) (*gorm.DB, error) {
+	return doCreateDBPool(mysql.New(mysql.Config{
+		Conn: db,
+	}))
+}
+
+func doCreateDBPool(dial gorm.Dialector) (*gorm.DB, error) {
+	db, err := gorm.Open(dial, &gorm.Config{
+		//Logger: logger.Default.LogMode(logger.Info),
+		Logger: logger.Default.LogMode(logger.Silent),
+	})
+	if err != nil {
+		return nil, err
+	}
 
 	registerPlugin(db)
 

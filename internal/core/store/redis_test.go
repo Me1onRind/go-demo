@@ -12,7 +12,7 @@ func Test_Set_Get(t *testing.T) {
 	s, err := miniredis.Run()
 	assert.Empty(t, err)
 	defer s.Close()
-	r := NewRedisPool(s.Addr())
+	r := NewRedisPoolFromAddr(s.Addr())
 	ctx := context.Background()
 	err = r.Set(ctx, "test:key", "value", 0).Err()
 	assert.Empty(t, err)

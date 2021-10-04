@@ -29,7 +29,7 @@ func newTestDB() (*gorm.DB, sqlmock.Sqlmock, error) {
 		return nil, nil, err
 	}
 	mock.ExpectQuery("SELECT VERSION").WillReturnRows(sqlmock.NewRows([]string{"VERSION"}).AddRow("5.7.32"))
-	gormDB, err := NewDBConnectPoolFRromDB(db)
+	gormDB, err := NewDBPoolFromDB(db)
 	if err != nil {
 		return nil, nil, err
 	}
