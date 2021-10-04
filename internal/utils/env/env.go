@@ -11,3 +11,7 @@ func GetEnv(key string, defaultValue string) string {
 	}
 	return value
 }
+
+func Env() string {
+	return GetEnv("env", "local")
+}

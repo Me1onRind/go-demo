@@ -14,14 +14,25 @@ import (
 func InitLogger() error {
 	config := zap.NewProductionEncoderConfig()
 	config.EncodeDuration = zapcore.MillisDurationEncoder
-	config.EncodeTime = zapcore.ISO8601TimeEncoder
-	//f, err := os.OpenFile("./log/info.log", os.O_WRONLY|os.O_RDONLY|os.O_APPEND|os.O_CREATE, 0755)
-	//if err != nil {
-	//panic(err)
-	//}
+	config.EncodeTime = zapcore.TimeEncoderOfLayout("2006-01-02 15:04:05")
+	config.EncodeLevel = zapcore.CapitalLevelEncoder
 	core := zapcore.NewCore(zapcore.NewJSONEncoder(config), zapcore.AddSync(os.Stdout), zapcore.InfoLevel)
 	logger.Logger = zap.New(core, zap.AddCaller())
+
+	stdoutConfig := zap.NewProductionEncoderConfig()
+	stdoutConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
+	stdoutConfig.EncodeDuration = zapcore.MillisDurationEncoder
+	stdoutConfig.EncodeTime = zapcore.TimeEncoderOfLayout("2006-01-02 15:04:05")
+	stdoutConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
+	stdoutConfig.ConsoleSeparator = "|"
+	stdoutCore := zapcore.NewCore(zapcore.NewConsoleEncoder(stdoutConfig), zapcore.AddSync(os.Stdout), zapcore.InfoLevel)
+	logger.StdoutLogger = zap.New(stdoutCore, zap.AddCaller())
 	return nil
+}
+
+func CloseLogger() error {
+	return nil
+	//return os.Stdout.Close()
 }
 
 func InitOpentracking(serviceName, version string) func() error {

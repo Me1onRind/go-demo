@@ -17,7 +17,7 @@ import (
 
 func InitLocalConfig(configDir string) func() error {
 	return func() error {
-		configPath := fmt.Sprintf("%s/%s.yaml", configDir, env.GetEnv("env", "test"))
+		configPath := fmt.Sprintf("%s/%s.yaml", configDir, env.Env())
 		configFile, err := os.Open(configPath)
 		if err != nil {
 			return err
@@ -28,7 +28,7 @@ func InitLocalConfig(configDir string) func() error {
 			return err
 		}
 
-		logger.Logger.Info("Read config file", zap.ByteString("content", configBytes))
+		logger.StdoutLogger.Info("Read config file", zap.ByteString("content", configBytes))
 
 		if err := yaml.Unmarshal(configBytes, config.LocalConfig); err != nil {
 			return err
@@ -38,11 +38,11 @@ func InitLocalConfig(configDir string) func() error {
 	}
 }
 
-func InitEtcdConfig(key string) func() error {
+func InitEtcdConfig(ctx context.Context, key string) func() error {
 	return func() error {
-		ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+		cancelCtx, cancel := context.WithTimeout(ctx, time.Second*5)
 		defer cancel()
-		resp, err := etcd_client.EtcdClient.Get(ctx, key)
+		resp, err := etcd_client.EtcdClient.Get(cancelCtx, key)
 		if err != nil {
 			return err
 		}
@@ -56,30 +56,30 @@ func InitEtcdConfig(key string) func() error {
 			return err
 		}
 
-		listenEtcdConfigChange(key)
+		listenEtcdConfigChange(ctx, key)
 
 		return nil
 	}
 }
 
 func loadEtcdConfig(configBytes []byte) error {
-	logger.Logger.Info("Read config content from etcd", zap.ByteString("content", configBytes))
+	logger.StdoutLogger.Info("Read config content from etcd", zap.ByteString("content", configBytes))
 	if err := yaml.Unmarshal(configBytes, config.RemoteConfig); err != nil {
 		return err
 	}
 	return nil
 }
 
-func listenEtcdConfigChange(key string) {
+func listenEtcdConfigChange(ctx context.Context, key string) {
 	go func() {
 		for {
-			rch := etcd_client.EtcdClient.Watch(context.TODO(), key) // context from main.go
+			rch := etcd_client.EtcdClient.Watch(ctx, key) // context from main.go
 			for wresp := range rch {
-				logger.Logger.Info("Etcd config change")
+				logger.StdoutLogger.Info("Etcd config change")
 				for _, ev := range wresp.Events {
 					configBytes := ev.Kv.Value
 					if err := loadEtcdConfig(configBytes); err != nil {
-						logger.Logger.Error("Listen etcd config failed", zap.ByteString("content", configBytes),
+						logger.StdoutLogger.Error("Listen etcd config failed", zap.ByteString("content", configBytes),
 							zap.String("key", key))
 					}
 				}

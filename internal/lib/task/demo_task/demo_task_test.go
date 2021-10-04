@@ -7,7 +7,7 @@ import (
 )
 
 func Test_Send(t *testing.T) {
-	asynq_client.InitAsynqClient("127.0.0.1:6379")
+	asynq_client.InitAsynqClientByRedisAddr("127.0.0.1:6379")
 	err := SendDemoTask(&DemoTask{
 		ID:   100,
 		Name: "test",

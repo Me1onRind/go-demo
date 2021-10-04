@@ -10,6 +10,7 @@ var (
 type DynamicConfig struct {
 	DBs   MysqlConfigs `yaml:"dbs"`
 	Redis RedisConfig  `yaml:"redis"`
+	Asynq AsynqConfig  `yaml:"asynd"`
 }
 
 type StaticConfig struct {
@@ -48,4 +49,8 @@ type RedisConfig struct {
 	PoolSize     int           `yaml:"pool_size"`
 	MinIdleConns int           `yaml:"min_idel_conns"`
 	IdleTimeout  time.Duration `yaml:"idle_timeout"`
+}
+
+type AsynqConfig struct {
+	Redis RedisConfig `yaml:"redis"`
 }

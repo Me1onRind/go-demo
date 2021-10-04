@@ -22,6 +22,26 @@ func InitDB() error {
 	return nil
 }
 
+func CloseDB() error {
+	db, err := store.DB.DB()
+	if err != nil {
+		return err
+	}
+	if err := db.Close(); err != nil {
+		return err
+	}
+
+	db, err = store.ConfigDB.DB()
+	if err != nil {
+		return err
+	}
+	if err := db.Close(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func InitLocalCache() error {
 	store.ConfigCache = gcache.New(100000).Expiration(time.Minute * 30).Build()
 	return nil

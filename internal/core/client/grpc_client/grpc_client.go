@@ -16,9 +16,11 @@ import (
 
 var (
 	FooClient pb.FooClient
+	fooCoon   *grpc.ClientConn
 )
 
 func InitGoDemoClient(target string, resolver gresolver.Builder) error {
+	var err error
 	conn, err := getGrpcConn(target, resolver)
 	if err != nil {
 		return err
@@ -26,6 +28,10 @@ func InitGoDemoClient(target string, resolver gresolver.Builder) error {
 
 	FooClient = pb.NewFooClient(conn)
 	return nil
+}
+
+func CloseGoDemoClient() error {
+	return fooCoon.Close()
 }
 
 func ResolveGoDemoGrpcError(err error) *common.Error {
