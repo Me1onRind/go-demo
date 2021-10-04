@@ -5,12 +5,12 @@ import (
 	"time"
 
 	"github.com/Me1onRind/go-demo/internal/core/common"
-	"github.com/Me1onRind/go-demo/internal/core/register"
 	"github.com/Me1onRind/go-demo/internal/err_code"
 	"github.com/Me1onRind/go-demo/protobuf/pb"
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
+	gresolver "google.golang.org/grpc/resolver"
 	"google.golang.org/grpc/status"
 )
 
@@ -18,8 +18,8 @@ var (
 	FooClient pb.FooClient
 )
 
-func InitGoDemoClient() error {
-	conn, err := getGrpcConn("go-demo")
+func InitGoDemoClient(target string, resolver gresolver.Builder) error {
+	conn, err := getGrpcConn(target, resolver)
 	if err != nil {
 		return err
 	}
@@ -40,17 +40,18 @@ func ResolveGoDemoGrpcError(err error) *common.Error {
 	return err_code.GRPCCallFailedError.WithErr(err)
 }
 
-func getGrpcConn(serviceName string) (*grpc.ClientConn, error) {
-	resolver, err := register.GrpcResolvers()
-	if err != nil {
-		return nil, err
-	}
+func getGrpcConn(target string, resolver gresolver.Builder) (*grpc.ClientConn, error) {
+	//func getGrpcConn(serviceName string) (*grpc.ClientConn, error) {
+	//resolver, err := resolver.NewBuilder(etcd_client.EtcdClient)
+	//if err != nil {
+	//return nil, err
+	//}
 
 	ctx, cancel := context.WithTimeout(context.TODO(), time.Second*2)
 	defer cancel()
 
 	policy := `{"loadBalancingPolicy":"round_robin"}`
-	conn, err := grpc.DialContext(ctx, register.DialTarget(serviceName),
+	conn, err := grpc.DialContext(ctx, target,
 		grpc.WithResolvers(resolver),
 		grpc.WithDefaultServiceConfig(policy),
 		grpc.WithInsecure(),

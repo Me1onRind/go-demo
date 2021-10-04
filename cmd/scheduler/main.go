@@ -11,6 +11,8 @@ import (
 func Init() {
 	funcs := []func() error{
 		initialize.InitLogger,
+		initialize.InitLocalConfig("./conf"),
+		initialize.InitEtcdClient,
 		initialize.InitDB,
 		initialize.InitLocalCache,
 	}

@@ -6,6 +6,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/Me1onRind/go-demo/internal/core/client/etcd_client"
 	uuid "github.com/satori/go.uuid"
 	clientv3 "go.etcd.io/etcd/client/v3"
 	"go.etcd.io/etcd/client/v3/naming/endpoints"
@@ -13,30 +14,14 @@ import (
 	gresolver "google.golang.org/grpc/resolver"
 )
 
-var client *clientv3.Client
-
 const (
 	prefix = "service"
 )
 
-func init() {
-	var err error
-	client, err = clientv3.New(clientv3.Config{
-		Endpoints: []string{
-			"localhost:2379",
-		},
-		DialTimeout:       time.Second * 5,
-		DialKeepAliveTime: time.Second * 5,
-	})
-	if err != nil {
-		panic(err)
-	}
-}
-
 func Register(ctx context.Context, serviceName, addr string) error {
 	log.Println("Try register to etcd ...")
 	// 创建一个租约
-	lease := clientv3.NewLease(client)
+	lease := clientv3.NewLease(etcd_client.EtcdClient)
 	cancelCtx, cancel := context.WithTimeout(ctx, time.Second*3)
 	defer cancel()
 	leaseResp, err := lease.Grant(cancelCtx, 3)
@@ -49,7 +34,7 @@ func Register(ctx context.Context, serviceName, addr string) error {
 		return err
 	}
 
-	em, err := endpoints.NewManager(client, prefix)
+	em, err := endpoints.NewManager(etcd_client.EtcdClient, prefix)
 	if err != nil {
 		return err
 	}
@@ -100,7 +85,6 @@ func keepRegister(ctx context.Context, leaseChannel <-chan *clientv3.LeaseKeepAl
 				}
 			case <-ctx.Done():
 				cleanFunc()
-				client.Close()
 				return
 			}
 		}
@@ -110,7 +94,6 @@ func keepRegister(ctx context.Context, leaseChannel <-chan *clientv3.LeaseKeepAl
 func DialTarget(serviceName string) string {
 	return fmt.Sprintf("etcd:///%s/%s", prefix, serviceName)
 }
-
 func GrpcResolvers() (gresolver.Builder, error) {
-	return resolver.NewBuilder(client)
+	return resolver.NewBuilder(etcd_client.EtcdClient)
 }

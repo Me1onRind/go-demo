@@ -9,7 +9,7 @@ import (
 	"github.com/Me1onRind/go-demo/internal/controller/foo_controller"
 	"github.com/Me1onRind/go-demo/internal/core/initialize"
 	"github.com/Me1onRind/go-demo/internal/core/middleware"
-	"github.com/Me1onRind/go-demo/internal/core/register"
+	"github.com/Me1onRind/go-demo/internal/lib/register"
 	"github.com/Me1onRind/go-demo/protobuf/pb"
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	"google.golang.org/grpc"
@@ -17,8 +17,10 @@ import (
 
 func Init() {
 	initFuncs := []func() error{
-		initialize.InitOpentracking("go-grpc-demo", "0.0.1"),
 		initialize.InitLogger,
+		initialize.InitLocalConfig("./conf"),
+		initialize.InitEtcdClient,
+		initialize.InitOpentracking("go-grpc-demo", "0.0.1"),
 	}
 
 	for _, v := range initFuncs {

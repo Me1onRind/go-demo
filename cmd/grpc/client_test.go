@@ -20,7 +20,7 @@ var (
 func TestMain(m *testing.M) {
 	_ = initialize.InitLogger()
 	commonCtx = common.NewContext(context.Background())
-	if err := grpc_client.InitGoDemoClient(); err != nil {
+	if err := initialize.InitGrpcClients(); err != nil {
 		return
 	}
 	os.Exit(m.Run())
