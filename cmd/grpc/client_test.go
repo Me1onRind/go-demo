@@ -6,20 +6,20 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Me1onRind/go-demo/internal/core/client/grpc_client"
-	"github.com/Me1onRind/go-demo/internal/core/common"
-	"github.com/Me1onRind/go-demo/internal/core/initialize"
+	"github.com/Me1onRind/go-demo/internal/lib/client/grpc_client"
+	"github.com/Me1onRind/go-demo/internal/lib/ctm_context"
+	"github.com/Me1onRind/go-demo/internal/lib/initialize"
 	"github.com/Me1onRind/go-demo/protobuf/pb"
 	"google.golang.org/grpc/status"
 )
 
 var (
-	commonCtx *common.Context
+	commonCtx *ctm_context.Context
 )
 
 func TestMain(m *testing.M) {
 	_ = initialize.InitLogger()
-	commonCtx = common.NewContext(context.Background())
+	commonCtx = ctm_context.NewContext(context.Background())
 	if err := initialize.InitGrpcClients(); err != nil {
 		return
 	}

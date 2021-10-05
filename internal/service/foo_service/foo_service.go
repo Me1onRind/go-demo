@@ -1,7 +1,9 @@
 package foo_service
 
 import (
-	"github.com/Me1onRind/go-demo/internal/core/common"
+	//"github.com/Me1onRind/go-demo/internal/lib/ctm_context"
+	"github.com/Me1onRind/go-demo/internal/lib/ctm_context"
+	"github.com/Me1onRind/go-demo/internal/lib/err_code"
 	"github.com/Me1onRind/go-demo/internal/third_party/go_demo_service"
 )
 
@@ -15,6 +17,6 @@ func NewFooService() *FooService {
 	}
 }
 
-func (f *FooService) ProxyGreet(ctx *common.Context, name, msg string) (string, *common.Error) {
+func (f *FooService) ProxyGreet(ctx *ctm_context.Context, name, msg string) (string, *err_code.Error) {
 	return f.GoDemoService.Greet(ctx, name, msg)
 }

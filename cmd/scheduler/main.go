@@ -6,9 +6,10 @@ import (
 
 	task_constant "github.com/Me1onRind/go-demo/internal/constant/task"
 	"github.com/Me1onRind/go-demo/internal/core/config"
-	"github.com/Me1onRind/go-demo/internal/core/initialize"
 	"github.com/Me1onRind/go-demo/internal/core/logger"
-	"github.com/Me1onRind/go-demo/internal/dao/periodic_task"
+	"github.com/Me1onRind/go-demo/internal/dao/periodic_task_dao"
+	"github.com/Me1onRind/go-demo/internal/lib/ctm_context"
+	"github.com/Me1onRind/go-demo/internal/lib/initialize"
 	"github.com/Me1onRind/go-demo/internal/lib/localcache"
 	"github.com/hibiken/asynq"
 )
@@ -54,8 +55,9 @@ func main() {
 		cancel()
 		Close()
 	}()
+	ctmCtx := ctm_context.NewContext(ctx)
 
-	localcache.LoadConfigCache(ctx)
+	localcache.LoadCache(ctmCtx)
 
 	asynqConfig := config.RemoteConfig.Asynq
 	scheduler := asynq.NewScheduler(asynq.RedisClientOpt{
@@ -65,7 +67,7 @@ func main() {
 		Logger: logger.StdoutLogger.Sugar(),
 	})
 
-	periodicTaskDao := periodic_task.NewPeriodicTaskDao()
+	periodicTaskDao := periodic_task_dao.NewPeriodicTaskDao()
 	tasks := periodicTaskDao.ListAllTask()
 	for _, task := range tasks {
 		_, err := scheduler.Register(task.Cronspec, asynq.NewTask(task_constant.TaskDemo, []byte(`{"id":123,"name":"test scheduler"}`)))

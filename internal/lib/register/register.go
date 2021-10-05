@@ -6,7 +6,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/Me1onRind/go-demo/internal/core/client/etcd_client"
+	"github.com/Me1onRind/go-demo/internal/lib/client/etcd_client"
 	uuid "github.com/satori/go.uuid"
 	clientv3 "go.etcd.io/etcd/client/v3"
 	"go.etcd.io/etcd/client/v3/naming/endpoints"

@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/Me1onRind/go-demo/internal/core/common"
-	"github.com/Me1onRind/go-demo/internal/err_code"
+	"github.com/Me1onRind/go-demo/internal/lib/ctm_context"
+	"github.com/Me1onRind/go-demo/internal/lib/err_code"
 	"github.com/Me1onRind/go-demo/internal/service/foo_service"
 	"github.com/Me1onRind/go-demo/protobuf/pb"
 	"github.com/Me1onRind/go-demo/protocol"
@@ -41,7 +41,7 @@ func (f *FooController) PanicResult(ctx context.Context, in *pb.Empty) (*pb.Empt
 	panic("no implement")
 }
 
-func (f *FooController) ProxyGreet(ctx *common.Context, raw interface{}) (interface{}, *common.Error) {
+func (f *FooController) ProxyGreet(ctx *ctm_context.Context, raw interface{}) (interface{}, *err_code.Error) {
 	request := raw.(*protocol.GreetProxyRequest)
 	reply, err := f.FooService.ProxyGreet(ctx, request.Name, request.Msg)
 	if err != nil {

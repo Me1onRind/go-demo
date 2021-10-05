@@ -1,12 +1,12 @@
 package localcache
 
 import (
-	"context"
 	"fmt"
 	"time"
 
+	"github.com/Me1onRind/go-demo/global/store"
 	"github.com/Me1onRind/go-demo/internal/core/logger"
-	"github.com/Me1onRind/go-demo/internal/core/store"
+	"github.com/Me1onRind/go-demo/internal/lib/ctm_context"
 	"github.com/Me1onRind/go-demo/internal/utils/goroutine"
 	"go.uber.org/zap"
 )
@@ -15,13 +15,13 @@ var (
 	localcacheVersions = map[string]uint64{}
 )
 
-func listenCacheChange(ctx context.Context, loaders []Loader) {
+func listenCacheChange(ctx *ctm_context.Context, loaders []Loader) {
 	goroutine.Go(func() {
 		for {
 			for _, loader := range loaders {
 				localCacheKey := loader.LocalCacheKey()
 				vk := versionKey(localCacheKey)
-				version, err := store.RedisPool.Get(ctx, vk).Uint64()
+				version, err := store.RedisClient.Get(ctx, vk).Uint64()
 				if err != nil {
 					logger.StdoutLogger.Error("Get localcache version failed", zap.String("localCacheKey", localCacheKey), zap.Error(err))
 				}
@@ -36,7 +36,7 @@ func listenCacheChange(ctx context.Context, loaders []Loader) {
 					logger.StdoutLogger.Info("Localcache version changed", zap.String("localCacheKey", localCacheKey),
 						zap.Uint64("oldVersion", oldVersion), zap.Uint64("newVersion", version))
 					goroutine.Go(func() {
-						_ = loadCache(loader)
+						_ = loadCache(ctx, loader)
 					})
 				}
 			}
@@ -44,14 +44,20 @@ func listenCacheChange(ctx context.Context, loaders []Loader) {
 	})
 }
 
-func loadCache(loader Loader) error {
+func loadCache(ctx *ctm_context.Context, loader Loader) error {
 	beginTime := time.Now()
 	defer func() {
 		logger.StdoutLogger.Info("Load localcache", zap.String("localCacheKey", loader.LocalCacheKey()), zap.Duration("cost", time.Since(beginTime)))
 	}()
-	if err := loader.LoadLocalCacheData(); err != nil {
+	data, err := loader.LoadLocalCacheData(ctx)
+	if err != nil {
 		logger.StdoutLogger.Error("Load localcache failed", zap.String("error", err.String()))
 		return err.GenError()
+	}
+
+	if err := loader.LocalCacheInstance().Set(loader.LocalCacheKey(), data); err != nil {
+		logger.StdoutLogger.Error("Set localcache failed", zap.String("error", err.Error()))
+		return err
 	}
 	return nil
 }

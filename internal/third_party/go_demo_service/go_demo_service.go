@@ -1,8 +1,9 @@
 package go_demo_service
 
 import (
-	"github.com/Me1onRind/go-demo/internal/core/client/grpc_client"
-	"github.com/Me1onRind/go-demo/internal/core/common"
+	"github.com/Me1onRind/go-demo/internal/lib/client/grpc_client"
+	"github.com/Me1onRind/go-demo/internal/lib/ctm_context"
+	"github.com/Me1onRind/go-demo/internal/lib/err_code"
 	"github.com/Me1onRind/go-demo/protobuf/pb"
 )
 
@@ -13,7 +14,7 @@ func NewGoDemoService() *GoDemoService {
 	return &GoDemoService{}
 }
 
-func (g *GoDemoService) Greet(ctx *common.Context, name, msg string) (string, *common.Error) {
+func (g *GoDemoService) Greet(ctx *ctm_context.Context, name, msg string) (string, *err_code.Error) {
 	resp, err := grpc_client.FooClient.Greet(ctx, &pb.GreetReq{
 		MyName: name,
 		Msg:    msg,

@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/Me1onRind/go-demo/internal/core/initialize"
-	"github.com/Me1onRind/go-demo/internal/core/middleware"
+	"github.com/Me1onRind/go-demo/internal/lib/initialize"
+	"github.com/Me1onRind/go-demo/internal/lib/middleware"
 	"github.com/Me1onRind/go-demo/internal/router"
 	"github.com/gin-gonic/gin"
 )
@@ -31,7 +31,10 @@ func main() {
 		middleware.GinTracer(),
 		middleware.GinLogger(),
 	)
+
 	router.SetFooRouter(apiGroup)
+	router.SetPeridoicTaskRouter(apiGroup)
+
 	if err := r.Run("0.0.0.0:8081"); err != nil {
 		panic(err)
 	}

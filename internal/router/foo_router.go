@@ -2,7 +2,7 @@ package router
 
 import (
 	"github.com/Me1onRind/go-demo/internal/controller/foo_controller"
-	"github.com/Me1onRind/go-demo/internal/core/gateway"
+	"github.com/Me1onRind/go-demo/internal/lib/gateway"
 	"github.com/Me1onRind/go-demo/protocol"
 	"github.com/gin-gonic/gin"
 )

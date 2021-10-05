@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/Me1onRind/go-demo/internal/constant/task"
-	"github.com/Me1onRind/go-demo/internal/core/gateway"
+	"github.com/Me1onRind/go-demo/internal/lib/gateway"
 	"github.com/Me1onRind/go-demo/internal/lib/task/demo_task"
 	"github.com/hibiken/asynq"
 )
