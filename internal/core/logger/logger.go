@@ -1,7 +1,10 @@
 package logger
 
 import (
+	"os"
+
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
 var (
@@ -9,13 +12,13 @@ var (
 	StdoutLogger *zap.Logger
 )
 
-//type AsynqLogger struct {
-//}
-
-//func NewAsyncLogger() *AsynqLogger {
-//a := &AsynqLogger{}
-//return a
-//}
-
-//func (a *AsynqLogger) Debug(args ...interface{}) {
-//}
+func init() {
+	stdoutConfig := zap.NewProductionEncoderConfig()
+	stdoutConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
+	stdoutConfig.EncodeDuration = zapcore.MillisDurationEncoder
+	stdoutConfig.EncodeTime = zapcore.TimeEncoderOfLayout("2006-01-02 15:04:05")
+	stdoutConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
+	stdoutConfig.ConsoleSeparator = "|"
+	stdoutCore := zapcore.NewCore(zapcore.NewConsoleEncoder(stdoutConfig), zapcore.AddSync(os.Stdout), zapcore.InfoLevel)
+	StdoutLogger = zap.New(stdoutCore, zap.AddCaller())
+}

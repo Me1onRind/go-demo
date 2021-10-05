@@ -42,3 +42,11 @@ func storeContext(c context.Context, ctx *Context) context.Context {
 		return context.WithValue(c, cKey, ctx)
 	}
 }
+
+func ContextLogger(ctx context.Context) *zap.Logger {
+	if commonCtx, ok := ctx.(*Context); ok {
+		return commonCtx.Logger
+	}
+
+	return logger.StdoutLogger
+}

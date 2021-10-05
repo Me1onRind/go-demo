@@ -19,14 +19,6 @@ func InitLogger() error {
 	core := zapcore.NewCore(zapcore.NewJSONEncoder(config), zapcore.AddSync(os.Stdout), zapcore.InfoLevel)
 	logger.Logger = zap.New(core, zap.AddCaller())
 
-	stdoutConfig := zap.NewProductionEncoderConfig()
-	stdoutConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
-	stdoutConfig.EncodeDuration = zapcore.MillisDurationEncoder
-	stdoutConfig.EncodeTime = zapcore.TimeEncoderOfLayout("2006-01-02 15:04:05")
-	stdoutConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
-	stdoutConfig.ConsoleSeparator = "|"
-	stdoutCore := zapcore.NewCore(zapcore.NewConsoleEncoder(stdoutConfig), zapcore.AddSync(os.Stdout), zapcore.InfoLevel)
-	logger.StdoutLogger = zap.New(stdoutCore, zap.AddCaller())
 	return nil
 }
 

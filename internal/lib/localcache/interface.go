@@ -6,4 +6,5 @@ import (
 
 type Loader interface {
 	LoadLocalCacheData() *common.Error
+	LocalCacheKey() string
 }

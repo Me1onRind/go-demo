@@ -5,22 +5,34 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/Me1onRind/go-demo/internal/core/common"
 	"github.com/Me1onRind/go-demo/internal/core/config"
 	"github.com/go-redis/redis/v8"
+	"go.uber.org/zap"
 )
 
 var (
 	RedisPool *redis.Client
 )
 
+type beginTimeKey struct{}
+
 type redisHook struct {
 }
 
 func (r *redisHook) BeforeProcess(ctx context.Context, cmd redis.Cmder) (context.Context, error) {
+	beginTime := time.Now()
+	ctx = context.WithValue(ctx, beginTimeKey{}, beginTime)
 	return ctx, nil
 }
 
 func (r *redisHook) AfterProcess(ctx context.Context, cmd redis.Cmder) error {
+	lg := common.ContextLogger(ctx)
+	beginTime := ctx.Value(beginTimeKey{}).(time.Time)
+	lg.Info("Redis command excute done", zap.Any("command", cmd.Args()), zap.Duration("cost", time.Since(beginTime)))
+	if err := cmd.Err(); err != nil {
+		lg.Error("Redis command error", zap.Any("command", cmd.Args()), zap.Error(err))
+	}
 	return nil
 }
 

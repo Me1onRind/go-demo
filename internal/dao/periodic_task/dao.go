@@ -33,10 +33,14 @@ func (p *PeriodicTaskDao) LoadLocalCacheData() *common.Error {
 		}
 	}
 
-	if err := store.ConfigCache.Set(localcache.PeriodicTask, result); err != nil {
+	if err := store.ConfigCache.Set(p.LocalCacheKey(), result); err != nil {
 		return err_code.SetLocalCacheError.WithErr(err)
 	}
 	return nil
+}
+
+func (p *PeriodicTaskDao) LocalCacheKey() string {
+	return localcache.PeriodicTask
 }
 
 func (p *PeriodicTaskDao) ListAllTask() []*PeriodicTaskTab {

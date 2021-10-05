@@ -3,13 +3,21 @@ package store
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/alicebob/miniredis/v2"
+	"github.com/alicebob/miniredis/v2/server"
+
+	//"github.com/alicebob/miniredis/v2/server"
 	"github.com/stretchr/testify/assert"
 )
 
 func Test_Set_Get(t *testing.T) {
 	s, err := miniredis.Run()
+	s.Server().SetPreHook(func(*server.Peer, string, ...string) bool {
+		time.Sleep(time.Millisecond * 5)
+		return false
+	})
 	assert.Empty(t, err)
 	defer s.Close()
 	r := NewRedisPoolFromAddr(s.Addr())

@@ -65,18 +65,6 @@ func doCreateDBPool(dial gorm.Dialector) (*gorm.DB, error) {
 func registerPlugin(db *gorm.DB) {
 	_ = db.Callback().Query().Before("*").Register("my_plugin:tracing_start", tracingStart())
 	_ = db.Callback().Query().After("*").Register("my_plugin:tracing_end", tracingEnd())
-	_ = db.Callback().Update().Before("*").Register("my_plugin:set_mtime", setMTime)
-	_ = db.Callback().Create().Before("*").Register("my_plugin:set_ctime_and_mtime", setCTimeAndMTime)
-}
-
-func setCTimeAndMTime(db *gorm.DB) {
-	now := time.Now().Unix()
-	db.Statement.SetColumn("ctime", now)
-	db.Statement.SetColumn("mtime", now)
-}
-
-func setMTime(db *gorm.DB) {
-	db.Statement.SetColumn("mtime", time.Now().Unix())
 }
 
 func tracingStart() func(*gorm.DB) {

@@ -55,7 +55,7 @@ func main() {
 		Close()
 	}()
 
-	localcache.LoadConfigCache()
+	localcache.LoadConfigCache(ctx)
 
 	asynqConfig := config.RemoteConfig.Asynq
 	scheduler := asynq.NewScheduler(asynq.RedisClientOpt{

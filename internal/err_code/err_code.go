@@ -17,6 +17,8 @@ const (
 	ReadDBFailed        = 10006
 	WriteDBFailed       = 10007
 	SetLocalCacheFailed = 10008
+	ReadRedisFailed     = 10009
+	WriteRedisFailed    = 10010
 
 	GoDemoCommonFailed = 20001
 )
@@ -33,6 +35,8 @@ var (
 	ReadDBError         = common.NewError(ReadDBFailed, "Read DB Failed", codes.Unavailable)
 	WriteDBError        = common.NewError(WriteDBFailed, "Write DB Failed", codes.Unavailable)
 	SetLocalCacheError  = common.NewError(SetLocalCacheFailed, "Write DB Failed", codes.Unavailable)
+	ReadRedisError      = common.NewError(ReadRedisFailed, "Read Redis Failed", codes.Unavailable)
+	WriteRedisError     = common.NewError(WriteRedisFailed, "Write Redis Failed", codes.Unavailable)
 
 	GoDemoCommonFailedError = common.NewError(GoDemoCommonFailed, "Call Go-demo Failed", codes.Aborted)
 )
