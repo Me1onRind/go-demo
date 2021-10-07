@@ -1,16 +1,16 @@
 package periodic_task_dao
 
-var (
+const (
 	PeriodicTaskTableName = "periodic_task_tab"
 )
 
 type PeriodicTaskTab struct {
-	ID       uint64 `gorm:"column:id"`
-	TaskName string `gorm:"column:task_name;size=128"`
-	Cronspec string `gorm:"column:cronspec;size=64"`
-	Status   uint8  `gorm:"column:status"`
-	CTime    uint32 `gorm:"autoCreateTime;column:ctime"`
-	MTime    uint32 `gorm:"autoUpdateTime;column:mtime"`
+	ID       uint64 `json:"id" gorm:"column:id"`
+	TaskName string `json:"task_name" gorm:"column:task_name;size=128"`
+	Cronspec string `json:"cronspec" gorm:"column:cronspec;size=64"`
+	Status   uint8  `json:"status" gorm:"column:status"`
+	CTime    uint32 `json:"ctime" gorm:"autoCreateTime;column:ctime"`
+	MTime    uint32 `json:"mtime" gorm:"autoUpdateTime;column:mtime"`
 }
 
 func (p *PeriodicTaskTab) TableName() string {

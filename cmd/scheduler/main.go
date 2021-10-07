@@ -19,9 +19,9 @@ func Init(ctx context.Context) {
 		initialize.InitLogger,
 		initialize.InitLocalConfig("./conf"),
 		initialize.InitEtcdClient,
-		initialize.InitEtcdConfig(ctx, "/go-demo/config.yaml"),
-		initialize.InitDB,
-		initialize.InitLocalCache,
+		initialize.InitEtcdConfig(ctx, "/go-demo/config.yml"),
+		initialize.InitMysqlClients,
+		initialize.InitRedisClient,
 	}
 
 	for _, v := range funcs {
@@ -37,7 +37,8 @@ func Close() {
 	funcs := []func() error{
 		initialize.CloseLogger,
 		initialize.CloseEtcdClient,
-		initialize.CloseDB,
+		initialize.CloseMysqlClients,
+		initialize.CloseRedisClient,
 	}
 
 	for _, v := range funcs {
@@ -49,6 +50,7 @@ func Close() {
 
 func main() {
 	ctx, cancel := context.WithCancel(context.Background())
+	//ctx := context.Background()
 	Init(ctx)
 
 	defer func() {
@@ -76,15 +78,7 @@ func main() {
 		}
 	}
 
-	//sigCh := make(chan os.Signal, 1)
-	//signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM)
-	//goroutine.Go(func() {
-	//sig := <-sigCh
-	//logger.Logger.Info("Catch exit signal", zap.Any("signal", sig))
-	//})
-
 	if err := scheduler.Run(); err != nil {
 		panic(err)
 	}
-	//scheduler.Register(
 }

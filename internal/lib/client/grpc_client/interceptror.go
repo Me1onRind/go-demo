@@ -50,7 +50,7 @@ func withLogger() grpc.UnaryClientInterceptor {
 		var err error
 		begin := time.Now()
 		defer func() {
-			commonCtx := ctm_context.GetContext(ctx)
+			commonCtx := ctx.(*ctm_context.Context)
 			commonCtx.Logger.Info("grpc request",
 				zap.String("method", method), zap.Reflect("req", req), zap.Reflect("reply", reply),
 				zap.Duration("cost", time.Since(begin)), zap.Error(err),
@@ -71,7 +71,7 @@ func withTimeout(timeout time.Duration) grpc.UnaryClientInterceptor {
 
 func withTracer() grpc.UnaryClientInterceptor {
 	return func(ctx context.Context, method string, req, reply interface{}, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
-		commonCtx := ctm_context.GetContext(ctx)
+		commonCtx := ctx.(*ctm_context.Context)
 		if commonCtx.Span == nil {
 			return invoker(ctx, method, req, reply, cc, opts...)
 		}

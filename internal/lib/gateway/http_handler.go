@@ -16,7 +16,7 @@ func JSON(handler HTTPHandler, paramType interface{}) gin.HandlerFunc {
 		var response *JSONResponse
 		var requestParams interface{}
 
-		commonCtx := ctm_context.GetContext(c)
+		commonCtx := ctm_context.GetCtmCtxFromGinCtx(c)
 
 		defer func() {
 			if response != nil {

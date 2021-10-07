@@ -3,24 +3,43 @@ package localcache
 import (
 	"sync"
 
-	"github.com/Me1onRind/go-demo/internal/dao/periodic_task_dao"
+	"github.com/Me1onRind/go-demo/internal/dao/kv_config_dao"
 	"github.com/Me1onRind/go-demo/internal/lib/ctm_context"
+	"github.com/bluele/gcache"
 )
 
-func LoadCache(ctx *ctm_context.Context) {
-	loaders := []Loader{
-		periodic_task_dao.NewPeriodicTaskDao(),
+type cacheConfig struct {
+	loaders []Loader
+	cache   gcache.Cache
+}
+
+func newPermanentCacheConfig(loaders []Loader) *cacheConfig {
+	return &cacheConfig{
+		loaders: loaders,
+		cache:   gcache.New(len(loaders)).Build(),
 	}
-	wg := &sync.WaitGroup{}
-	for _, loader := range loaders {
-		wg.Add(1)
-		go func(loader Loader) {
-			defer wg.Done()
-			if err := loadCache(ctx, loader); err != nil {
-				panic(err)
-			}
-		}(loader)
+}
+
+func LoadCache(ctx *ctm_context.Context) {
+	configs := []*cacheConfig{
+		newPermanentCacheConfig([]Loader{
+			kv_config_dao.NewKvConfigDao(),
+		}),
 	}
 
-	listenCacheChange(ctx, loaders)
+	wg := &sync.WaitGroup{}
+	for _, config := range configs {
+		for _, loader := range config.loaders {
+			loader.SetLocalcache(config.cache)
+			wg.Add(1)
+			go func(loader Loader) {
+				defer wg.Done()
+				if err := loadCache(ctx, config.cache, loader); err != nil {
+					panic(err)
+				}
+			}(loader)
+		}
+		listenCacheChange(ctx, config.cache, config.loaders)
+	}
+	wg.Wait()
 }

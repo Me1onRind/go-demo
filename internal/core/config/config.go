@@ -10,9 +10,10 @@ var (
 )
 
 type DynamicConfig struct {
-	DBs   MysqlConfigs `yaml:"dbs"`
-	Redis RedisConfig  `yaml:"redis"`
-	Asynq AsynqConfig  `yaml:"asynd"`
+	DBs        MysqlConfigs     `yaml:"dbs"`
+	Redis      RedisConfig      `yaml:"redis"`
+	Asynq      AsynqConfig      `yaml:"asynd"`
+	Localcache LocalcacheConfig `yaml:"localcache"`
 }
 
 type StaticConfig struct {
@@ -40,4 +41,15 @@ type RedisConfig struct {
 
 type AsynqConfig struct {
 	Redis RedisConfig `yaml:"redis"`
+}
+
+type LocalcacheConfig struct {
+	CheckVersionInterval time.Duration `yaml:"check_version_interval"`
+}
+
+func (l *LocalcacheConfig) GetCheckVersionInterval() time.Duration {
+	if l.CheckVersionInterval > 0 {
+		return l.CheckVersionInterval * time.Second
+	}
+	return 5 * time.Second
 }

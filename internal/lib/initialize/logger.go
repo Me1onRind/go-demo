@@ -12,7 +12,20 @@ import (
 )
 
 func InitLogger() error {
-	config := zap.NewProductionEncoderConfig()
+	config := zapcore.EncoderConfig{
+		TimeKey:        "ts",
+		LevelKey:       "level",
+		NameKey:        "logger",
+		CallerKey:      "caller",
+		FunctionKey:    zapcore.OmitKey,
+		MessageKey:     "msg",
+		StacktraceKey:  "stacktrace",
+		LineEnding:     zapcore.DefaultLineEnding,
+		EncodeLevel:    zapcore.LowercaseLevelEncoder,
+		EncodeTime:     zapcore.EpochTimeEncoder,
+		EncodeDuration: zapcore.SecondsDurationEncoder,
+		EncodeCaller:   zapcore.ShortCallerEncoder,
+	}
 	config.EncodeDuration = zapcore.MillisDurationEncoder
 	config.EncodeTime = zapcore.TimeEncoderOfLayout("2006-01-02 15:04:05")
 	config.EncodeLevel = zapcore.CapitalLevelEncoder

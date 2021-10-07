@@ -16,7 +16,7 @@ func GrpcLogger() grpc.UnaryServerInterceptor {
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
 		begin := time.Now()
 		defer func() {
-			commonCtx := ctm_context.GetContext(ctx)
+			commonCtx := ctx.(*ctm_context.Context)
 			commonCtx.Logger.Info("access request", zap.Reflect("req", req), zap.Reflect("resp", resp),
 				zap.String("method", info.FullMethod), zap.Error(err), zap.Duration("cost", time.Since(begin)),
 			)
@@ -28,7 +28,7 @@ func GrpcLogger() grpc.UnaryServerInterceptor {
 
 func GinLogger() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		ctx := ctm_context.GetContext(c)
+		ctx := ctm_context.GetCtmCtxFromGinCtx(c)
 		var request []byte
 
 		contentType := c.ContentType()

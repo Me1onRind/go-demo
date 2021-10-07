@@ -14,10 +14,8 @@ import (
 	"gorm.io/gorm"
 )
 
-type contextKey string
-
 const (
-	cKey contextKey = "cmtx"
+	ctmCtxKey = "ctm"
 )
 
 type Context struct {
@@ -31,10 +29,10 @@ type Context struct {
 
 func NewContext(ctx context.Context) *Context {
 	c := &Context{
-		Logger: logger.Logger,
-		txs:    map[db_label.Label]*gorm.DB{},
+		Context: ctx,
+		Logger:  logger.Logger,
+		txs:     map[db_label.Label]*gorm.DB{},
 	}
-	c.Context = storeContext(ctx, c)
 	return c
 }
 
@@ -85,18 +83,13 @@ func (c *Context) Transaction(label db_label.Label, fc func() *err_code.Error) (
 	return err
 }
 
-func GetContext(c context.Context) *Context {
-	return c.Value(cKey).(*Context)
+func (ctx *Context) SaveInGinCtx(c *gin.Context) {
+	c.Set(ctmCtxKey, ctx)
 }
 
-func storeContext(c context.Context, ctx *Context) context.Context {
-	switch v := c.(type) {
-	case *gin.Context:
-		v.Set(string(cKey), ctx)
-		return c
-	default:
-		return context.WithValue(c, cKey, ctx)
-	}
+func GetCtmCtxFromGinCtx(c *gin.Context) *Context {
+	ctx, _ := c.Get(ctmCtxKey)
+	return ctx.(*Context)
 }
 
 func ContextLogger(ctx context.Context) *zap.Logger {

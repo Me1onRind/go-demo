@@ -7,7 +7,9 @@ import (
 )
 
 type Loader interface {
-	LoadLocalCacheData(ctx *ctm_context.Context) (interface{}, *err_code.Error)
-	LocalCacheKey() string
-	LocalCacheInstance() gcache.Cache
+	GetLocalcacheKey() string
+	SetLocalcache(cache gcache.Cache)
+	LocalcacheVersion(ctx *ctm_context.Context) (uint64, *err_code.Error)
+	RefreshLocalcacheVersion(ctx *ctm_context.Context) *err_code.Error
+	LoadLocalcacheData(ctx *ctm_context.Context) (interface{}, *err_code.Error)
 }

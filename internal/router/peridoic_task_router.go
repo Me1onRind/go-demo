@@ -11,4 +11,6 @@ func SetPeridoicTaskRouter(router gin.IRouter) {
 	group := router.Group("/peridoic_task")
 	peridoicTaskController := peridoic_task_controller.NewPeridoicTaskController()
 	group.POST("create", gateway.JSON(peridoicTaskController.CreatePeridoicTask, &protocol.CreatePeridoicTaskReq{}))
+	group.POST("update", gateway.JSON(peridoicTaskController.UpdatePeridoicTask, &protocol.UpdatePeridoicTaskReq{}))
+	group.GET("get", gateway.JSON(peridoicTaskController.GetPeridoicTaskByID, &protocol.GetPeridoicTaskByIDReq{}))
 }

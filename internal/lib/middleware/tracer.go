@@ -35,7 +35,7 @@ func GrpcTracer() grpc.UnaryServerInterceptor {
 			span.Finish()
 		}()
 
-		commonCtx := ctm_context.GetContext(ctx)
+		commonCtx := ctx.(*ctm_context.Context)
 		commonCtx.Span = span
 		commonCtx.Logger = commonCtx.Logger.With(zap.String("requestID", requestIDFromSpan(span.Context())))
 
@@ -46,7 +46,7 @@ func GrpcTracer() grpc.UnaryServerInterceptor {
 
 func GinTracer() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		commonCtx := ctm_context.GetContext(c)
+		commonCtx := ctm_context.GetCtmCtxFromGinCtx(c)
 		span := opentracing.GlobalTracer().StartSpan(c.Request.URL.Path)
 		defer span.Finish()
 

@@ -27,3 +27,23 @@ func (p *PeridoicTaskController) CreatePeridoicTask(ctx *ctm_context.Context, ra
 
 	return task, nil
 }
+
+func (p *PeridoicTaskController) UpdatePeridoicTask(ctx *ctm_context.Context, raw interface{}) (interface{}, *err_code.Error) {
+	request := raw.(*protocol.UpdatePeridoicTaskReq)
+	task, err := p.PeridoicTaskService.UpdatePeridoicTaskByID(ctx, request)
+	if err != nil {
+		return nil, err
+	}
+
+	return task, nil
+}
+
+func (p *PeridoicTaskController) GetPeridoicTaskByID(ctx *ctm_context.Context, raw interface{}) (interface{}, *err_code.Error) {
+	request := raw.(*protocol.GetPeridoicTaskByIDReq)
+	task, err := p.PeridoicTaskService.GetPeridoicTaskByID(ctx, request.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	return task, nil
+}

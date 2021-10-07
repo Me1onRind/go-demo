@@ -18,7 +18,8 @@ func GrpcContext() grpc.UnaryServerInterceptor {
 
 func GinContext() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		_ = ctm_context.NewContext(c)
+		ctx := ctm_context.NewContext(c)
+		ctx.SaveInGinCtx(c)
 		c.Next()
 	}
 }

@@ -13,7 +13,7 @@ import (
 
 func NewDBClient(cfg *config.MysqlResources) (*gorm.DB, error) {
 	masterCfg := &cfg.Master
-	dail := mysql.Open(masterCfg.DSN())
+	dail := mysql.Open(masterCfg.DSN(cfg.DBName))
 	db, err := doCreateDBClient(dail)
 	if err != nil {
 		return nil, err
@@ -32,7 +32,7 @@ func NewDBClient(cfg *config.MysqlResources) (*gorm.DB, error) {
 
 	slaveDialector := []gorm.Dialector{}
 	for _, v := range cfg.Slaves {
-		slaveDialector = append(slaveDialector, mysql.Open(v.DSN()))
+		slaveDialector = append(slaveDialector, mysql.Open(v.DSN(cfg.DBName)))
 	}
 	if len(slaveDialector) > 0 {
 		slavePoolCfg := cfg.SlavePool
@@ -61,8 +61,8 @@ func NewDBClientFromDB(db *sql.DB) (*gorm.DB, error) {
 
 func doCreateDBClient(dial gorm.Dialector) (*gorm.DB, error) {
 	db, err := gorm.Open(dial, &gorm.Config{
-		//Logger: logger.Default.LogMode(logger.Info),
-		Logger:                 logger.Default.LogMode(logger.Silent),
+		Logger: logger.Default.LogMode(logger.Info),
+		//Logger:                 logger.Default.LogMode(logger.Silent),
 		SkipDefaultTransaction: true,
 	})
 	if err != nil {

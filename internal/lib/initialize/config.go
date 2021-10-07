@@ -17,7 +17,7 @@ import (
 
 func InitLocalConfig(configDir string) func() error {
 	return func() error {
-		configPath := fmt.Sprintf("%s/%s.yaml", configDir, env.Env())
+		configPath := fmt.Sprintf("%s/%s.yml", configDir, env.Env())
 		configFile, err := os.Open(configPath)
 		if err != nil {
 			return err
