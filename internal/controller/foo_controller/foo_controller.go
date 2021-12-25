@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/Me1onRind/go-demo/internal/lib/ctm_context"
+	"github.com/Me1onRind/go-demo/infrastructure/ctm_context"
 	"github.com/Me1onRind/go-demo/internal/lib/err_code"
 	"github.com/Me1onRind/go-demo/internal/service/foo_service"
 	"github.com/Me1onRind/go-demo/protobuf/pb"
-	"github.com/Me1onRind/go-demo/protocol"
+	"github.com/Me1onRind/go-demo/protocol/http_proto"
 )
 
 type FooController struct {
@@ -42,7 +42,7 @@ func (f *FooController) PanicResult(ctx context.Context, in *pb.Empty) (*pb.Empt
 }
 
 func (f *FooController) ProxyGreet(ctx *ctm_context.Context, raw interface{}) (interface{}, *err_code.Error) {
-	request := raw.(*protocol.GreetProxyRequest)
+	request := raw.(*http_proto.GreetProxyRequest)
 	reply, err := f.FooService.ProxyGreet(ctx, request.Name, request.Msg)
 	if err != nil {
 		return nil, err

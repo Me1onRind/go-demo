@@ -4,7 +4,7 @@ import (
 	"github.com/Me1onRind/go-demo/internal/dao/periodic_task_dao"
 	"github.com/Me1onRind/go-demo/internal/lib/ctm_context"
 	"github.com/Me1onRind/go-demo/internal/lib/err_code"
-	protocol "github.com/Me1onRind/go-demo/protocol/peridoic_task_protocol"
+	protocol "github.com/Me1onRind/go-demo/protocol/http_proto/peridoic_task_protocol"
 )
 
 type PeridoicTaskService struct {

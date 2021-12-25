@@ -1,9 +1,12 @@
 package gateway
 
 import (
-	"github.com/Me1onRind/go-demo/internal/lib/ctm_context"
+	"github.com/Me1onRind/go-demo/constant/sys_constant"
+	"github.com/Me1onRind/go-demo/infrastructure/ctm_context"
+	"github.com/Me1onRind/go-demo/infrastructure/logger"
 	"github.com/Me1onRind/go-demo/internal/lib/err_code"
 	"github.com/gin-gonic/gin"
+	"github.com/opentracing/opentracing-go"
 	"go.uber.org/zap"
 )
 
@@ -16,13 +19,15 @@ func JSON(handler HTTPHandler, paramType interface{}) gin.HandlerFunc {
 		var response *JSONResponse
 		var requestParams interface{}
 
-		commonCtx := ctm_context.GetCtmCtxFromGinCtx(c)
-
 		defer func() {
 			if response != nil {
-				span := commonCtx.Span
-				span.SetTag("errcode", response.Errcode)
-				span.SetTag("message", response.Message)
+				value, exist := c.Get(sys_constant.SpanKey)
+				if exist {
+					if span, ok := value.(opentracing.Span); ok {
+						span.SetTag("errcode", response.Errcode)
+						span.SetTag("message", response.Message)
+					}
+				}
 				c.JSON(200, response)
 			}
 		}()
@@ -35,8 +40,9 @@ func JSON(handler HTTPHandler, paramType interface{}) gin.HandlerFunc {
 			}
 		}
 
+		commonCtx := ctm_context.NewContext(c)
 		data, err = handler(commonCtx, requestParams)
-		commonCtx.Logger.Info("json gateway", zap.Reflect("inputObject", requestParams), zap.Reflect("outputObject", data), zap.Reflect("error", err))
+		logger.CtxInfo(commonCtx, "json gateway", zap.Reflect("inputObject", requestParams), zap.Reflect("outputObject", data), zap.Reflect("error", err))
 		if err == nil {
 			err = err_code.SUCCESS
 		}

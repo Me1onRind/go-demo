@@ -4,7 +4,7 @@ import (
 	"github.com/Me1onRind/go-demo/internal/dao/kv_config_dao"
 	"github.com/Me1onRind/go-demo/internal/lib/ctm_context"
 	"github.com/Me1onRind/go-demo/internal/lib/err_code"
-	protocol "github.com/Me1onRind/go-demo/protocol/kv_config_protocol"
+	protocol "github.com/Me1onRind/go-demo/protocol/http_proto/kv_config_protocol"
 )
 
 type KvConfigService struct {

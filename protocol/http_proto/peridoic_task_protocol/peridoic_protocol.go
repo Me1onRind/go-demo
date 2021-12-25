@@ -1,4 +1,4 @@
-package peridoic_task_protocol
+package http_proto
 
 type CreatePeridoicTaskReq struct {
 	TaskName string `json:"task_name" binding:"required,min=1,max=128"`

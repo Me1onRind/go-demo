@@ -1,4 +1,4 @@
-package store
+package client_singleton
 
 import (
 	"github.com/go-redis/redis/v8"

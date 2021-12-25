@@ -1,4 +1,4 @@
-package protocol
+package http_proto
 
 type GreetProxyRequest struct {
 	Name string `bind:"required,min=1"`

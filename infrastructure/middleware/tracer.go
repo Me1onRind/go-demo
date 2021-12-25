@@ -4,11 +4,10 @@ import (
 	"context"
 	"strings"
 
-	"github.com/Me1onRind/go-demo/internal/lib/ctm_context"
+	"github.com/Me1onRind/go-demo/constant/sys_constant"
 	"github.com/gin-gonic/gin"
 	opentracing "github.com/opentracing/opentracing-go"
 	"go.elastic.co/apm/module/apmhttp"
-	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
 )
@@ -35,9 +34,7 @@ func GrpcTracer() grpc.UnaryServerInterceptor {
 			span.Finish()
 		}()
 
-		commonCtx := ctx.(*ctm_context.Context)
-		commonCtx.Span = span
-		commonCtx.Logger = commonCtx.Logger.With(zap.String("requestID", requestIDFromSpan(span.Context())))
+		ctx = context.WithValue(ctx, sys_constant.SpanKey, span)
 
 		resp, err = handler(ctx, req)
 		return resp, err
@@ -46,13 +43,11 @@ func GrpcTracer() grpc.UnaryServerInterceptor {
 
 func GinTracer() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		commonCtx := ctm_context.GetCtmCtxFromGinCtx(c)
 		span := opentracing.GlobalTracer().StartSpan(c.Request.URL.Path)
 		defer span.Finish()
 
-		commonCtx.Span = span
-		commonCtx.Logger = commonCtx.Logger.With(zap.String("requestID", requestIDFromSpan(span.Context())))
-
+		traceId := requestIDFromSpan(span.Context())
+		c.Set(sys_constant.TraceIdKey, traceId)
 		c.Next()
 	}
 }

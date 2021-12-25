@@ -6,18 +6,20 @@ import (
 	"io/ioutil"
 	"time"
 
-	"github.com/Me1onRind/go-demo/internal/lib/ctm_context"
+	"github.com/Me1onRind/go-demo/constant/sys_constant"
+	"github.com/Me1onRind/go-demo/global/logger_singleton"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
+
+	"github.com/Me1onRind/go-demo/infrastructure/logger"
 )
 
 func GrpcLogger() grpc.UnaryServerInterceptor {
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
 		begin := time.Now()
 		defer func() {
-			commonCtx := ctx.(*ctm_context.Context)
-			commonCtx.Logger.Info("access request", zap.Reflect("req", req), zap.Reflect("resp", resp),
+			logger.CtxInfo(ctx, "access request", zap.Reflect("req", req), zap.Reflect("resp", resp),
 				zap.String("method", info.FullMethod), zap.Error(err), zap.Duration("cost", time.Since(begin)),
 			)
 		}()
@@ -26,9 +28,18 @@ func GrpcLogger() grpc.UnaryServerInterceptor {
 	}
 }
 
-func GinLogger() gin.HandlerFunc {
+func GinSetContextLogger() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		ctx := ctm_context.GetCtmCtxFromGinCtx(c)
+		traceId := c.GetString(sys_constant.TraceIdKey)
+		loggerInstance := logger_singleton.Logger.With(
+			zap.String("traceId", traceId),
+		)
+		c.Set(sys_constant.LoggerKey, loggerInstance)
+	}
+}
+
+func GinAccessLog() gin.HandlerFunc {
+	return func(c *gin.Context) {
 		var request []byte
 
 		contentType := c.ContentType()
@@ -36,7 +47,7 @@ func GinLogger() gin.HandlerFunc {
 			var err error
 			request, err = c.GetRawData()
 			if err != nil {
-				ctx.Logger.Error("Get request body error", zap.Error(err))
+				logger.CtxError(c, "Get request body error", zap.Error(err))
 			}
 			c.Request.Body = ioutil.NopCloser(bytes.NewBuffer(request))
 		}
@@ -50,7 +61,7 @@ func GinLogger() gin.HandlerFunc {
 		start := time.Now()
 		defer func() {
 			end := time.Now()
-			ctx.Logger.Info("access log",
+			logger.CtxInfo(c, "access request",
 				zap.String("proto", c.Request.Proto), zap.String("method", c.Request.Method), zap.String("path", c.Request.URL.Path), zap.String("rawQuery", c.Request.URL.RawQuery),
 				zap.String("reqBody", string(request)), zap.String("clientIP", c.ClientIP()), zap.String("resp", lw.buff.String()), zap.Duration("cost", end.Sub(start)),
 			)

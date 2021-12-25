@@ -1,4 +1,4 @@
-package kv_conifg_protocol
+package http_proto
 
 type CreateKVconfigReq struct {
 	ConfigKey string `json:"config_key" binding:"required,min=1,max=64"`
