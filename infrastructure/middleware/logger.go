@@ -15,7 +15,7 @@ import (
 	"github.com/Me1onRind/go-demo/infrastructure/logger"
 )
 
-func GrpcLogger() grpc.UnaryServerInterceptor {
+func GrpcAccessLog() grpc.UnaryServerInterceptor {
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
 		begin := time.Now()
 		defer func() {
@@ -35,6 +35,21 @@ func GinSetContextLogger() gin.HandlerFunc {
 			zap.String("traceId", traceId),
 		)
 		c.Set(sys_constant.LoggerKey, loggerInstance)
+	}
+}
+
+func GrpcSetContextLogger() grpc.UnaryServerInterceptor {
+	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
+		value := ctx.Value(sys_constant.TraceIdKey)
+		if value != nil {
+			if traceId, ok := value.(string); ok {
+				loggerInstance := logger_singleton.Logger.With(
+					zap.String("traceId", traceId),
+				)
+				ctx = context.WithValue(ctx, sys_constant.LoggerKey, loggerInstance)
+			}
+		}
+		return handler(ctx, req)
 	}
 }
 

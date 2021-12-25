@@ -6,9 +6,9 @@ import (
 	"log"
 	"net"
 
+	"github.com/Me1onRind/go-demo/infrastructure/initialize"
+	"github.com/Me1onRind/go-demo/infrastructure/middleware"
 	"github.com/Me1onRind/go-demo/internal/controller/foo_controller"
-	"github.com/Me1onRind/go-demo/internal/lib/initialize"
-	"github.com/Me1onRind/go-demo/internal/lib/middleware"
 	"github.com/Me1onRind/go-demo/internal/lib/register"
 	"github.com/Me1onRind/go-demo/protobuf/pb"
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
@@ -17,9 +17,9 @@ import (
 
 func Init() {
 	initFuncs := []func() error{
-		initialize.InitLogger,
-		initialize.InitLocalConfig("./conf"),
-		initialize.InitEtcdClient,
+		initialize.InitLogger(),
+		//initialize.InitLocalConfig("./conf"),
+		//initialize.InitEtcdClient,
 		initialize.InitOpentracking("go-grpc-demo", "0.0.1"),
 	}
 
@@ -44,10 +44,10 @@ func main() {
 		log.Fatalf("failed to listen: %v", err)
 	}
 	s := grpc.NewServer(grpc_middleware.WithUnaryServerChain(
-		middleware.GrpcContext(),
 		middleware.GrpcRecover(),
 		middleware.GrpcTracer(),
-		middleware.GrpcLogger(),
+		middleware.GrpcSetContextLogger(),
+		middleware.GrpcAccessLog(),
 	))
 	registerService(s)
 

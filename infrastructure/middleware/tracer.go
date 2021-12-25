@@ -15,11 +15,7 @@ import (
 func GrpcTracer() grpc.UnaryServerInterceptor {
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
 		// tracer
-		md, _ := metadata.FromIncomingContext(ctx)
-		carrier := opentracing.HTTPHeadersCarrier{
-			apmhttp.W3CTraceparentHeader: md.Get(strings.ToLower(apmhttp.W3CTraceparentHeader)),
-			apmhttp.TracestateHeader:     md.Get(strings.ToLower(apmhttp.TracestateHeader)),
-		}
+		carrier := traceCarrierFromCtx(ctx)
 		spanCtx, _ := opentracing.GlobalTracer().Extract(opentracing.HTTPHeaders, carrier)
 		var span opentracing.Span
 		if spanCtx == nil {
@@ -27,15 +23,16 @@ func GrpcTracer() grpc.UnaryServerInterceptor {
 		} else {
 			span = opentracing.GlobalTracer().StartSpan(info.FullMethod, opentracing.ChildOf(spanCtx))
 		}
+
 		defer func() {
 			span.SetTag("req", req)
 			span.SetTag("resp", resp)
 			span.SetTag("error", err)
 			span.Finish()
 		}()
-
+		traceId := requestIDFromSpan(span.Context())
 		ctx = context.WithValue(ctx, sys_constant.SpanKey, span)
-
+		ctx = context.WithValue(ctx, sys_constant.TraceIdKey, traceId)
 		resp, err = handler(ctx, req)
 		return resp, err
 	}
@@ -48,8 +45,18 @@ func GinTracer() gin.HandlerFunc {
 
 		traceId := requestIDFromSpan(span.Context())
 		c.Set(sys_constant.TraceIdKey, traceId)
+		c.Set(sys_constant.SpanKey, span)
 		c.Next()
 	}
+}
+
+func traceCarrierFromCtx(ctx context.Context) opentracing.HTTPHeadersCarrier {
+	md, _ := metadata.FromIncomingContext(ctx)
+	carrier := opentracing.HTTPHeadersCarrier{
+		apmhttp.W3CTraceparentHeader: md.Get(strings.ToLower(apmhttp.W3CTraceparentHeader)),
+		apmhttp.TracestateHeader:     md.Get(strings.ToLower(apmhttp.TracestateHeader)),
+	}
+	return carrier
 }
 
 func requestIDFromSpan(sm opentracing.SpanContext) string {
