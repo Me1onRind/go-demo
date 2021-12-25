@@ -2,9 +2,9 @@ package gateway
 
 import (
 	"github.com/Me1onRind/go-demo/constant/sys_constant"
+	"github.com/Me1onRind/go-demo/err_code"
 	"github.com/Me1onRind/go-demo/infrastructure/ctm_context"
 	"github.com/Me1onRind/go-demo/infrastructure/logger"
-	"github.com/Me1onRind/go-demo/internal/lib/err_code"
 	"github.com/gin-gonic/gin"
 	"github.com/opentracing/opentracing-go"
 	"go.uber.org/zap"

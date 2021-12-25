@@ -1,7 +1,7 @@
 package gateway
 
 import (
-	"github.com/Me1onRind/go-demo/internal/lib/err_code"
+	"github.com/Me1onRind/go-demo/err_code"
 )
 
 type JSONResponse struct {

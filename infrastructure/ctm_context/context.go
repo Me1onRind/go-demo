@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/Me1onRind/go-demo/err_code"
 	"github.com/Me1onRind/go-demo/global/client_singleton"
 	"github.com/Me1onRind/go-demo/infrastructure/db_label"
-	"github.com/Me1onRind/go-demo/internal/lib/err_code"
 	"gorm.io/gorm"
 )
 

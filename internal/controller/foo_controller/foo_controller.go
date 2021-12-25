@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/Me1onRind/go-demo/err_code"
 	"github.com/Me1onRind/go-demo/infrastructure/ctm_context"
-	"github.com/Me1onRind/go-demo/internal/lib/err_code"
 	"github.com/Me1onRind/go-demo/internal/service/foo_service"
 	"github.com/Me1onRind/go-demo/protobuf/pb"
 	"github.com/Me1onRind/go-demo/protocol/http_proto"

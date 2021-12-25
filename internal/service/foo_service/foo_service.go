@@ -2,8 +2,8 @@ package foo_service
 
 import (
 	//"github.com/Me1onRind/go-demo/internal/lib/ctm_context"
+	"github.com/Me1onRind/go-demo/err_code"
 	"github.com/Me1onRind/go-demo/infrastructure/ctm_context"
-	"github.com/Me1onRind/go-demo/internal/lib/err_code"
 	"github.com/Me1onRind/go-demo/internal/third_party/go_demo_service"
 )
 

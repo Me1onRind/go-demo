@@ -18,7 +18,7 @@ type Error struct {
 	grpcCode codes.Code
 }
 
-func NewError(code int32, message string, grpcCode codes.Code) *Error {
+func newError(code int32, message string, grpcCode codes.Code) *Error {
 	if _, ok := errcodes[code]; ok {
 		panic(fmt.Sprintf("Error code:%d exist", code))
 	}
