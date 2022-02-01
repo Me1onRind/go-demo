@@ -16,6 +16,7 @@ require (
 	github.com/json-iterator/go v1.1.11
 	github.com/kr/pretty v0.2.0 // indirect
 	github.com/opentracing/opentracing-go v1.1.0
+	github.com/prometheus/client_golang v1.5.1
 	github.com/satori/go.uuid v1.2.0
 	github.com/spf13/cast v1.4.1 // indirect
 	github.com/stretchr/testify v1.7.0
@@ -32,7 +33,6 @@ require (
 	golang.org/x/time v0.0.0-20191024005414-555d28b269f0 // indirect
 	google.golang.org/genproto v0.0.0-20210828152312-66f60bf46e71 // indirect
 	google.golang.org/grpc v1.40.0
-	gopkg.in/yaml.v2 v2.4.0
 	gorm.io/driver/mysql v1.1.2
 	gorm.io/gorm v1.21.14
 	gorm.io/plugin/dbresolver v1.1.0

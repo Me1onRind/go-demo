@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"time"
 )
 
@@ -14,6 +15,7 @@ type DynamicConfig struct {
 	Redis      RedisConfig      `yaml:"redis"`
 	Asynq      AsynqConfig      `yaml:"asynd"`
 	Localcache LocalcacheConfig `yaml:"localcache"`
+	Prometheus PrometheusConfig `yaml:"prometheus"`
 }
 
 type StaticConfig struct {
@@ -52,4 +54,16 @@ func (l *LocalcacheConfig) GetCheckVersionInterval() time.Duration {
 		return l.CheckVersionInterval * time.Second
 	}
 	return 5 * time.Second
+}
+
+type PrometheusConfig struct {
+	Port int `yaml:"port"`
+}
+
+func (p *PrometheusConfig) Addr() string {
+	port := p.Port
+	if port == 0 {
+		port = 10000
+	}
+	return fmt.Sprintf("0.0.0.0:%d", port)
 }

@@ -44,9 +44,6 @@ func main() {
 		middleware.GinTracer(),
 		middleware.GinSetContextLogger(),
 		middleware.GinAccessLog(),
-		//middleware.GinContext(),
-		//middleware.GinRecover(),
-	//middleware.GinLogger(),
 	)
 
 	router.SetFooRouter(apiGroup)
