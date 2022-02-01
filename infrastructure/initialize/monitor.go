@@ -10,11 +10,14 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
-func InitPromethuesServer() error {
+func InitPrometheusServer() error {
 
 	prometheus.MustRegister(prometheus_vec.ReqTotalCounterVec)
 
 	log.Printf("Prometheus Server listen address: %s", config.RemoteConfig.Prometheus.Addr())
 	http.Handle("/metrics", promhttp.Handler())
-	return http.ListenAndServe(config.RemoteConfig.Prometheus.Addr(), nil)
+	go func() {
+		http.ListenAndServe(config.RemoteConfig.Prometheus.Addr(), nil)
+	}()
+	return nil
 }
