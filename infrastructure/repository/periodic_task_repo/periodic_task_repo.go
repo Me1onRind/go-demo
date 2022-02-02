@@ -4,11 +4,9 @@ import (
 	"errors"
 	"sync"
 
-	"github.com/Me1onRind/go-demo/global/store/db_label"
-	"github.com/Me1onRind/go-demo/internal/constant/localcache"
-	"github.com/Me1onRind/go-demo/internal/dao"
-	"github.com/Me1onRind/go-demo/internal/lib/ctm_context"
-	"github.com/Me1onRind/go-demo/internal/lib/err_code"
+	"github.com/Me1onRind/go-demo/err_code"
+	"github.com/Me1onRind/go-demo/infrastructure/ctm_context"
+	"github.com/Me1onRind/go-demo/infrastructure/db_label"
 	"gorm.io/gorm"
 )
 
@@ -18,61 +16,54 @@ var (
 )
 
 type PeriodicTaskDao struct {
-	dao.LocalcacheDao
 }
 
 func NewPeriodicTaskDao() *PeriodicTaskDao {
 	newPeridoicTaskDaoOnce.Do(func() {
-		t = &PeriodicTaskDao{
-			LocalcacheDao: dao.LocalcacheDao{
-				LocalcacheKey: localcache.PeriodicTask,
-			},
-		}
+		t = &PeriodicTaskDao{}
 	})
 	return t
 }
 
 func (p *PeriodicTaskDao) CreatePeriodicTask(ctx *ctm_context.Context, task *PeriodicTaskTab) *err_code.Error {
-	if err := p.checkPeriodicTaskNoExist(ctx, task.TaskName, task.ID); err != nil {
+	if err := p.checkPeriodicTaskNoExist(ctx, task.TaskName, task.Id); err != nil {
 		return err
 	}
 
-	if err := ctx.DB(db_label.ConfigDB).Create(task).Error; err != nil {
+	if err := ctx.GetDB(db_label.ConfigDB).Create(task).Error; err != nil {
 		return err_code.WriteDBError.WithErr(err)
 	}
 
-	p.RefreshLocalcacheVersion(ctx)
 	return nil
 }
 
 func (p *PeriodicTaskDao) GetPeriodicTaskByID(ctx *ctm_context.Context, id uint64) (*PeriodicTaskTab, *err_code.Error) {
 	var task PeriodicTaskTab
-	if err := ctx.DB(db_label.ConfigDB).Where("id=?", id).Take(&task).Error; err != nil {
+	if err := ctx.GetDB(db_label.ConfigDB).Where("id=?", id).Take(&task).Error; err != nil {
 		return nil, err_code.ReadDBError.WithErr(err)
 	}
 	return &task, nil
 }
 
 func (p *PeriodicTaskDao) UpdatePeriodicTask(ctx *ctm_context.Context, task *PeriodicTaskTab) *err_code.Error {
-	if err := p.checkPeriodicTaskNoExist(ctx, task.TaskName, task.ID); err != nil {
+	if err := p.checkPeriodicTaskNoExist(ctx, task.TaskName, task.Id); err != nil {
 		return err
 	}
 
-	if err := ctx.DB(db_label.ConfigDB).Save(task).Error; err != nil {
+	if err := ctx.GetDB(db_label.ConfigDB).Save(task).Error; err != nil {
 		return err_code.WriteDBError.WithErr(err)
 	}
 
-	p.RefreshLocalcacheVersion(ctx)
 	return nil
 }
 
 func (p *PeriodicTaskDao) checkPeriodicTaskNoExist(ctx *ctm_context.Context, taskName string, skipID uint64) *err_code.Error {
 	var existTask PeriodicTaskTab
-	db := ctx.DB(db_label.ConfigDB)
+	db := ctx.GetDB(db_label.ConfigDB)
 	err := db.Where("task_name=?", taskName).Where("id!=?", skipID).Take(&existTask).Error
 	if !errors.Is(err, gorm.ErrRecordNotFound) {
 		if err == nil {
-			return err_code.DBRecordExistError.Withf("task_id:%d, task_name:%s", existTask.ID, existTask.TaskName)
+			return err_code.DBRecordExistError.Withf("task_id:%d, task_name:%s", existTask.Id, existTask.TaskName)
 		}
 		return err_code.ReadDBError.WithErr(err)
 	}
@@ -85,7 +76,7 @@ func (p *PeriodicTaskDao) LoadLocalcacheData(ctx *ctm_context.Context) (interfac
 	result := []*PeriodicTaskTab{}
 	for {
 		data := make([]*PeriodicTaskTab, 0, limiter)
-		if err := ctx.DB(db_label.ConfigDB).Where("id>?", minID).Limit(limiter).Order("id").Find(&data).Error; err != nil {
+		if err := ctx.GetDB(db_label.ConfigDB).Where("id>?", minID).Limit(limiter).Order("id").Find(&data).Error; err != nil {
 			return nil, err_code.ReadDBError.WithErr(err)
 		}
 		if len(data) == 0 {
@@ -93,17 +84,17 @@ func (p *PeriodicTaskDao) LoadLocalcacheData(ctx *ctm_context.Context) (interfac
 		}
 		result = append(result, data...)
 		for _, v := range data {
-			minID = v.ID
+			minID = v.Id
 		}
 	}
 	return result, nil
 }
 
-func (p *PeriodicTaskDao) ListAllTask() []*PeriodicTaskTab {
-	data, _ := p.Localcache.Get(localcache.PeriodicTask)
-	if data != nil {
-		tasks := data.([]*PeriodicTaskTab)
-		return tasks
-	}
-	return nil
-}
+//func (p *PeriodicTaskDao) ListAllTask() []*PeriodicTaskTab {
+//data, _ := p.Localcache.Get(localcache.PeriodicTask)
+//if data != nil {
+//tasks := data.([]*PeriodicTaskTab)
+//return tasks
+//}
+//return nil
+//}

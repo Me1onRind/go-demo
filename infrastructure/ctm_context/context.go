@@ -10,10 +10,6 @@ import (
 	"gorm.io/gorm"
 )
 
-const (
-	ctmCtxKey = "ctm"
-)
-
 type Context struct {
 	context.Context
 	txs map[db_label.Label]*gorm.DB

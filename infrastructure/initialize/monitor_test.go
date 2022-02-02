@@ -22,7 +22,7 @@ import (
 )
 
 func TestPrometheusServer(t *testing.T) {
-	InitPrometheusServer()
+	_ = InitPrometheusServer(context.Background())
 	time.Sleep(time.Millisecond * 10)
 
 	total := 10
@@ -34,7 +34,7 @@ func TestPrometheusServer(t *testing.T) {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			f(context.Background(), nil, &grpc.UnaryServerInfo{
+			_, _ = f(context.Background(), nil, &grpc.UnaryServerInfo{
 				FullMethod: "test/method",
 			}, func(ctx context.Context, req interface{}) (interface{}, error) { return nil, nil })
 		}()
