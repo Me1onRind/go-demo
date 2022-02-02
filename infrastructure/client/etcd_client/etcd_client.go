@@ -8,16 +8,11 @@ import (
 	clientv3 "go.etcd.io/etcd/client/v3"
 )
 
-var (
-	EtcdClient *clientv3.Client
-)
-
-func InitEtcdClient() error {
-	var err error
-	EtcdClient, err = clientv3.New(clientv3.Config{
-		Endpoints:         config.LocalConfig.Etcd.Endpoints,
+func InitEtcdClient(cfg *config.EtcdConfig) (*clientv3.Client, error) {
+	etcdClient, err := clientv3.New(clientv3.Config{
+		Endpoints:         cfg.Endpoints,
 		DialTimeout:       time.Second * 5,
 		DialKeepAliveTime: time.Second * 5,
 	})
-	return err
+	return etcdClient, err
 }

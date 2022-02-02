@@ -6,7 +6,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/Me1onRind/go-demo/internal/lib/client/etcd_client"
+	"github.com/Me1onRind/go-demo/global/client_singleton"
 	uuid "github.com/satori/go.uuid"
 	clientv3 "go.etcd.io/etcd/client/v3"
 	"go.etcd.io/etcd/client/v3/naming/endpoints"
@@ -21,7 +21,7 @@ const (
 func Register(ctx context.Context, serviceName, addr string) error {
 	log.Println("Try register to etcd ...")
 	// 创建一个租约
-	lease := clientv3.NewLease(etcd_client.EtcdClient)
+	lease := clientv3.NewLease(client_singleton.EtcdClient)
 	cancelCtx, cancel := context.WithTimeout(ctx, time.Second*3)
 	defer cancel()
 	leaseResp, err := lease.Grant(cancelCtx, 3)
@@ -34,7 +34,7 @@ func Register(ctx context.Context, serviceName, addr string) error {
 		return err
 	}
 
-	em, err := endpoints.NewManager(etcd_client.EtcdClient, prefix)
+	em, err := endpoints.NewManager(client_singleton.EtcdClient, prefix)
 	if err != nil {
 		return err
 	}
@@ -95,5 +95,5 @@ func DialTarget(serviceName string) string {
 	return fmt.Sprintf("etcd:///%s/%s", prefix, serviceName)
 }
 func GrpcResolvers() (gresolver.Builder, error) {
-	return resolver.NewBuilder(etcd_client.EtcdClient)
+	return resolver.NewBuilder(client_singleton.EtcdClient)
 }

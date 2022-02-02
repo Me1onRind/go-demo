@@ -1,5 +1,14 @@
 package gateway
 
+import (
+	"context"
+	"encoding/json"
+
+	"github.com/Me1onRind/go-demo/err_code"
+	"github.com/Me1onRind/go-demo/infrastructure/ctm_context"
+	"github.com/hibiken/asynq"
+)
+
 //import (
 //"context"
 
@@ -9,24 +18,24 @@ package gateway
 //json "github.com/json-iterator/go"
 //)
 
-//type TaskHandler func(c *ctm_context.Context, taskParam interface{}) (err *err_code.Error)
+type TaskHandler func(c *ctm_context.Context, taskParam interface{}) (err *err_code.Error)
 
-//func JsonTask(handler TaskHandler, paramType interface{}) asynq.HandlerFunc {
-//return func(ctx context.Context, t *asynq.Task) error {
-//var taskParam interface{}
-//if paramType != nil {
-//taskParam = parserProtocol(paramType)
-//}
+func JsonTask(handler TaskHandler, paramType interface{}) asynq.HandlerFunc {
+	return func(ctx context.Context, t *asynq.Task) error {
+		var taskParam interface{}
+		if paramType != nil {
+			taskParam = parserProtocol(paramType)
+		}
 
-//if err := json.Unmarshal(t.Payload(), taskParam); err != nil {
-//return err
-//}
+		if err := json.Unmarshal(t.Payload(), taskParam); err != nil {
+			return err
+		}
 
-//newCtx := ctm_context.NewContext(ctx)
-//err := handler(newCtx, taskParam)
-//if err != nil {
-//return err.GenError()
-//}
-//return nil
-//}
-//}
+		newCtx := ctm_context.NewContext(ctx)
+		err := handler(newCtx, taskParam)
+		if err != nil {
+			return err.GenError()
+		}
+		return nil
+	}
+}

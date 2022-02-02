@@ -3,10 +3,10 @@ package demo_task
 import (
 	"fmt"
 
+	"github.com/Me1onRind/go-demo/err_code"
+	"github.com/Me1onRind/go-demo/infrastructure/client/asynq_client"
+	"github.com/Me1onRind/go-demo/infrastructure/ctm_context"
 	"github.com/Me1onRind/go-demo/internal/constant/task"
-	"github.com/Me1onRind/go-demo/internal/lib/client/asynq_client"
-	"github.com/Me1onRind/go-demo/internal/lib/ctm_context"
-	"github.com/Me1onRind/go-demo/internal/lib/err_code"
 	"github.com/hibiken/asynq"
 	json "github.com/json-iterator/go"
 )

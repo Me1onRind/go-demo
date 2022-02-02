@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/Me1onRind/go-demo/internal/lib/err_code"
+	"github.com/Me1onRind/go-demo/err_code"
 	"github.com/Me1onRind/go-demo/protobuf/pb"
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	"google.golang.org/grpc"
