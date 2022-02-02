@@ -2,11 +2,10 @@ package redis_client
 
 import (
 	"context"
-	"fmt"
 	"time"
 
-	"github.com/Me1onRind/go-demo/internal/core/config"
-	"github.com/Me1onRind/go-demo/internal/lib/ctm_context"
+	"github.com/Me1onRind/go-demo/config"
+	"github.com/Me1onRind/go-demo/infrastructure/logger"
 	"github.com/go-redis/redis/v8"
 	"go.uber.org/zap"
 )
@@ -27,11 +26,10 @@ func (r *redisHook) BeforeProcess(ctx context.Context, cmd redis.Cmder) (context
 }
 
 func (r *redisHook) AfterProcess(ctx context.Context, cmd redis.Cmder) error {
-	lg := ctm_context.ContextLogger(ctx)
 	beginTime := ctx.Value(beginTimeKey{}).(time.Time)
-	lg.Info("Redis command excute done", zap.String("detail", cmd.String()), zap.Duration("cost", time.Since(beginTime)))
-	if err := cmd.Err(); err != nil {
-		lg.Error("Redis command error", zap.String("detail", cmd.String()), zap.Error(err))
+	logger.CtxInfo(ctx, "Redis command excute done", zap.String("detail", cmd.String()), zap.Duration("cost", time.Since(beginTime)))
+	if err := cmd.Err(); err != nil && err != redis.Nil {
+		logger.CtxError(ctx, "Redis command error", zap.String("detail", cmd.String()), zap.Error(err))
 	}
 	return nil
 }
@@ -57,7 +55,7 @@ func NewRedisClientFromAddr(addr string) *redis.Client {
 func NewRedisClient(cfg *config.RedisConfig) *redis.Client {
 	client := redis.NewClient(&redis.Options{
 		Network:      "tcp",
-		Addr:         fmt.Sprintf("%s:%d", cfg.Host, cfg.Port),
+		Addr:         cfg.Addr,
 		ReadTimeout:  time.Millisecond * cfg.ReadTimeout,
 		WriteTimeout: time.Millisecond * cfg.WriteTimeout,
 		PoolSize:     cfg.PoolSize,

@@ -32,8 +32,7 @@ type MysqlConfigs struct {
 }
 
 type RedisConfig struct {
-	Host         string        `yaml:"host"`
-	Port         int           `yaml:"port"`
+	Addr         string        `yaml:"addr"`
 	ReadTimeout  time.Duration `yaml:"read_timeout"`
 	WriteTimeout time.Duration `yaml:"write_timeout"`
 	PoolSize     int           `yaml:"pool_size"`

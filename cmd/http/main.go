@@ -3,8 +3,8 @@ package main
 import (
 	"context"
 
-	"github.com/Me1onRind/go-demo/infrastructure/initialize"
 	"github.com/Me1onRind/go-demo/infrastructure/middleware"
+	"github.com/Me1onRind/go-demo/initialize"
 	"github.com/Me1onRind/go-demo/internal/router"
 	"github.com/gin-gonic/gin"
 )

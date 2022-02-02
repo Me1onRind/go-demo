@@ -6,10 +6,10 @@ import (
 	"log"
 	"net"
 
-	"github.com/Me1onRind/go-demo/infrastructure/initialize"
 	"github.com/Me1onRind/go-demo/infrastructure/middleware"
+	"github.com/Me1onRind/go-demo/infrastructure/register"
+	"github.com/Me1onRind/go-demo/initialize"
 	"github.com/Me1onRind/go-demo/internal/controller/foo_controller"
-	"github.com/Me1onRind/go-demo/internal/lib/register"
 	"github.com/Me1onRind/go-demo/protobuf/pb"
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	"google.golang.org/grpc"
