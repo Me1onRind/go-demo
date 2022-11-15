@@ -1,0 +1,5 @@
+etcd:
+  endpoints:
+    - 127.0.0.1:1234
+  dial_timeout: 5s
+

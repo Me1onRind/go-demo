@@ -1,11 +1,11 @@
 package middleware
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 
 	"github.com/Me1onRind/go-demo/constant/code"
-	"github.com/Me1onRind/go-demo/internal/infrastructure/base"
 	"github.com/gin-gonic/gin"
 	jsoniter "github.com/json-iterator/go"
 )
@@ -16,12 +16,12 @@ type JsonResponse struct {
 	Data    any    `json:"data"`
 }
 
-type HTTPHandler func(c *base.Context, raw any) (data any, err error)
+type HTTPHandler func(c context.Context, raw any) (data any, err error)
 
 func JSON(handler HTTPHandler, paramType any) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		ctx := mustGetGinExtractContext(c)
-		data, err := handler(base.NewContext(ctx), nil)
+		data, err := handler(ctx, nil)
 		if err != nil {
 		}
 
