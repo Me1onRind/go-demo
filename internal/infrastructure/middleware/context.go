@@ -10,14 +10,11 @@ const (
 	ginReqCtxKey = "req-ctx"
 )
 
-func ExtractRequestCtx() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		setGinExtractContext(c, c.Request.Context())
-	}
-}
-
 func mustGetGinExtractContext(c *gin.Context) context.Context {
 	value, _ := c.Get(ginReqCtxKey)
+	if value == nil {
+		setGinExtractContext(c, c.Request.Context())
+	}
 	return value.(context.Context)
 }
 

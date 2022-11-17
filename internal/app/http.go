@@ -22,7 +22,6 @@ func NewHttpServer() *HttpServer {
 
 func (h *HttpServer) RegisterMiddleware(r *gin.Engine) *HttpServer {
 	r.Use(
-		middleware.ExtractRequestCtx(),
 		middleware.Recover(),
 		middleware.SetRequestId(),
 		middleware.AccessLog(),
