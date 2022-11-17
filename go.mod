@@ -4,6 +4,7 @@ go 1.18
 
 require (
 	github.com/gin-gonic/gin v1.8.1
+	github.com/golang/mock v1.6.0
 	github.com/json-iterator/go v1.1.12
 	github.com/satori/go.uuid v1.2.0
 	github.com/sirupsen/logrus v1.9.0

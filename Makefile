@@ -6,3 +6,6 @@ supervisor_run:
 
 lint:
 	golangci-lint run ./...
+
+mock:
+	mockgen --source ./internal/infrastructure/client/etcd/etcd.go --destination ./internal/infrastructure/client/etcd/mock_etcd.go --package etcd
