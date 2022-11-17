@@ -1,13 +1,7 @@
 package errors
 
 import (
-	"errors"
 	"fmt"
-)
-
-var (
-	duplicateCheck               = map[int32]*Error{}
-	DuplicateRegisterError error = errors.New("Code has benn register")
 )
 
 type Error struct {
@@ -17,17 +11,12 @@ type Error struct {
 	cause   error
 }
 
-func NewUniqCodeError(code int32, message string) (*Error, error) {
-	if value, ok := duplicateCheck[code]; ok {
-		return nil, fmt.Errorf("Code:[%d] uniq new failed:[%w], exist value:[{message:%s}]", code, DuplicateRegisterError, value.message)
-	}
-
+func NewError(code int32, message string) *Error {
 	e := &Error{
 		Code:    code,
 		message: message,
 	}
-	duplicateCheck[code] = e
-	return e, nil
+	return e
 }
 
 func (e *Error) Error() string {

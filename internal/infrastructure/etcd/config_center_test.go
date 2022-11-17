@@ -9,7 +9,7 @@ import (
 )
 
 func Test_PullAndWatchConfig(t *testing.T) {
-	PullAndWatchConfig(context.Background(), &configmd.EtcdConfig{
+	_ = PullAndWatchConfig(context.Background(), &configmd.EtcdConfig{
 		Endpoints:   []string{"127.0.0.1:2379"},
 		DialTimeout: time.Second * 5,
 	}, "test", nil)
