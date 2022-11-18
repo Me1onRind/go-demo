@@ -1,10 +1,15 @@
 package app
 
 import (
+	"context"
+
+	"github.com/Me1onRind/go-demo/internal/infrastructure/logger"
 	"github.com/Me1onRind/go-demo/internal/infrastructure/middleware"
+	"github.com/Me1onRind/go-demo/internal/initialize"
 	"github.com/Me1onRind/go-demo/internal/usecase/unexpectuc"
 	"github.com/Me1onRind/go-demo/internal/usecase/useruc"
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 )
 
 type HttpServer struct {
@@ -29,11 +34,31 @@ func (h *HttpServer) RegisterMiddleware(r *gin.Engine) *HttpServer {
 	return h
 }
 
-func (h *HttpServer) ReigsterRouter(router *gin.RouterGroup) {
+func (h *HttpServer) ReigsterRouter(router *gin.RouterGroup) *HttpServer {
 	router = router.Group("/api")
 	userGroup := router.Group("/user")
 	userGroup.GET("get_user_detail", middleware.JSON(h.UserUsecase.QueryUserInfo, nil))
 
 	unexpectGroup := router.Group("/unexpect")
 	unexpectGroup.GET("/panic", middleware.JSON(h.UnexpectUsecase.Panic, nil))
+	return h
+}
+
+func (h *HttpServer) Init() *HttpServer {
+	initFuncs := []initialize.InitHandler{
+		initialize.InitFileConfig("./conf.yml"),
+		initialize.InitEtcdClient(),
+		initialize.InitDynamicConfig(),
+	}
+	ctx := context.Background()
+	ctx = logger.WithFields(ctx, logrus.Fields{
+		logger.RequestIdKey: "main-goruntine",
+	})
+
+	for _, f := range initFuncs {
+		if err := f(ctx); err != nil {
+			logger.CtxFatalf(ctx, "initialize fail, err:[%s]", err)
+		}
+	}
+	return h
 }

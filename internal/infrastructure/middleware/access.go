@@ -2,7 +2,7 @@ package middleware
 
 import (
 	"bytes"
-	"io/ioutil"
+	"io"
 	"time"
 
 	"github.com/Me1onRind/go-demo/internal/infrastructure/logger"
@@ -20,8 +20,10 @@ func AccessLog() gin.HandlerFunc {
 		if contentType == "application/json" || contentType == "text/plain" {
 			request, err = c.GetRawData()
 			if err != nil {
+				logger.CtxErrorf(mustGetGinExtractContext(c), "GetRawData faile, cause:[%s]", err)
+			} else {
+				c.Request.Body = io.NopCloser(bytes.NewBuffer(request))
 			}
-			c.Request.Body = ioutil.NopCloser(bytes.NewBuffer(request))
 		}
 		lw := &logWriter{
 			ResponseWriter: c.Writer,

@@ -7,12 +7,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-type loggerKey string
-
-const (
-	requestIdKey    loggerKey = "request-id"
-	customPrefixKey loggerKey = "custom-prefix"
-)
+type loggerKey struct{}
 
 var (
 	log = logrus.New()
@@ -20,18 +15,27 @@ var (
 
 func init() {
 	log.Out = os.Stdout
+	/*log.SetReportCaller(true)*/
 }
 
-func WithRequestId(ctx context.Context, requestId string) context.Context {
-	return context.WithValue(ctx, requestIdKey, requestId)
+func WithContext(ctx context.Context) context.Context {
+	return context.WithValue(ctx, loggerKey{}, log.WithContext(ctx))
 }
 
-func WithCustomPrefix(ctx context.Context, val any) context.Context {
-	return context.WithValue(ctx, customPrefixKey, val)
+func WithFields(ctx context.Context, fields logrus.Fields) context.Context {
+	l := getLoggerFromCtx(ctx).WithFields(fields)
+	return context.WithValue(ctx, loggerKey{}, l)
+}
+
+func getLoggerFromCtx(ctx context.Context) *logrus.Entry {
+	if l, ok := ctx.Value(loggerKey{}).(*logrus.Entry); ok {
+		return l
+	}
+	return log.WithContext(ctx)
 }
 
 func CtxDebugf(ctx context.Context, format string, a ...interface{}) {
-	ctxLogf(ctx, logrus.DebugLevel, format, a...)
+	getLoggerFromCtx(ctx).Debugf(format, a...)
 }
 
 func Debugf(format string, a ...interface{}) {
@@ -39,7 +43,7 @@ func Debugf(format string, a ...interface{}) {
 }
 
 func CtxInfof(ctx context.Context, format string, a ...interface{}) {
-	ctxLogf(ctx, logrus.InfoLevel, format, a...)
+	getLoggerFromCtx(ctx).Infof(format, a...)
 }
 
 func Infof(format string, a ...interface{}) {
@@ -47,7 +51,7 @@ func Infof(format string, a ...interface{}) {
 }
 
 func CtxWarnf(ctx context.Context, format string, a ...interface{}) {
-	ctxLogf(ctx, logrus.WarnLevel, format, a...)
+	getLoggerFromCtx(ctx).Warnf(format, a...)
 }
 
 func Warnf(format string, a ...interface{}) {
@@ -55,26 +59,17 @@ func Warnf(format string, a ...interface{}) {
 }
 
 func CtxErrorf(ctx context.Context, format string, a ...interface{}) {
-	ctxLogf(ctx, logrus.ErrorLevel, format, a...)
+	getLoggerFromCtx(ctx).Errorf(format, a...)
 }
 
 func Errorf(format string, a ...interface{}) {
-	log.Infof(format, a...)
+	log.Errorf(format, a...)
 }
 
-func ctxLogf(ctx context.Context, level logrus.Level, format string, a ...interface{}) {
-	fields := logrus.Fields{}
+func CtxFatalf(ctx context.Context, format string, a ...interface{}) {
+	getLoggerFromCtx(ctx).Fatalf(format, a...)
+}
 
-	if reqId := ctx.Value(requestIdKey); reqId != nil {
-		fields["request_id"] = reqId
-	}
-
-	if customPrefix := ctx.Value(customPrefixKey); customPrefix != nil {
-		fields["custom_prefix"] = customPrefix
-	}
-	if len(fields) > 0 {
-		log.WithFields(fields).Logf(level, format, a...)
-		return
-	}
-	log.Logf(level, format, a...)
+func Fatalf(ctx context.Context, format string, a ...interface{}) {
+	log.Fatalf(format, a...)
 }

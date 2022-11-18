@@ -14,6 +14,7 @@ func mustGetGinExtractContext(c *gin.Context) context.Context {
 	value, _ := c.Get(ginReqCtxKey)
 	if value == nil {
 		setGinExtractContext(c, c.Request.Context())
+		return c.Request.Context()
 	}
 	return value.(context.Context)
 }

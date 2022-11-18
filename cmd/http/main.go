@@ -12,7 +12,8 @@ func main() {
 
 	app.NewHttpServer().
 		RegisterMiddleware(r).
-		ReigsterRouter(r.Group("/"))
+		ReigsterRouter(r.Group("/")).
+		Init()
 
 	if err := r.Run(); err != nil {
 		fmt.Println(err)

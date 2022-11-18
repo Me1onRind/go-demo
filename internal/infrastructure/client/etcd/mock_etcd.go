@@ -35,6 +35,20 @@ func (m *MockClient) EXPECT() *MockClientMockRecorder {
 	return m.recorder
 }
 
+// Close mocks base method.
+func (m *MockClient) Close() error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Close")
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Close indicates an expected call of Close.
+func (mr *MockClientMockRecorder) Close() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Close", reflect.TypeOf((*MockClient)(nil).Close))
+}
+
 // Get mocks base method.
 func (m *MockClient) Get(ctx context.Context, key string, timeout time.Duration) ([]byte, error) {
 	m.ctrl.T.Helper()
@@ -62,4 +76,16 @@ func (m *MockClient) Put(ctx context.Context, key, value string, timeout time.Du
 func (mr *MockClientMockRecorder) Put(ctx, key, value, timeout interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Put", reflect.TypeOf((*MockClient)(nil).Put), ctx, key, value, timeout)
+}
+
+// Watch mocks base method.
+func (m *MockClient) Watch(ctx context.Context, key string, f WatchHandler) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "Watch", ctx, key, f)
+}
+
+// Watch indicates an expected call of Watch.
+func (mr *MockClientMockRecorder) Watch(ctx, key, f interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Watch", reflect.TypeOf((*MockClient)(nil).Watch), ctx, key, f)
 }

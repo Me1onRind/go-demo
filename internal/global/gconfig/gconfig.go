@@ -1,4 +1,4 @@
-package config
+package gconfig
 
 import "github.com/Me1onRind/go-demo/internal/model/configmd"
 

@@ -1,0 +1,6 @@
+etcd:
+  endpoints:
+    - 127.0.0.1:2379
+  dial_timeout: 2s
+
+dym_cfg_key: "/go-demo/config.yml"

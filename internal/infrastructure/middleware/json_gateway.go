@@ -23,6 +23,7 @@ func JSON(handler HTTPHandler, paramType any) gin.HandlerFunc {
 		ctx := mustGetGinExtractContext(c)
 		data, err := handler(ctx, nil)
 		if err != nil {
+			// TODO
 		}
 
 		jsonData, err := jsoniter.Marshal(&JsonResponse{
