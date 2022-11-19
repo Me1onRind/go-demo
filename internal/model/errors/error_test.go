@@ -2,9 +2,8 @@ package errors
 
 import (
 	"errors"
-	"testing"
-
 	"io"
+	"testing"
 
 	"github.com/stretchr/testify/assert"
 )

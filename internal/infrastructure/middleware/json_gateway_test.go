@@ -90,7 +90,7 @@ func Test_NewProtocolStruct(t *testing.T) {
 			OriginZeroProtocol: &P{},
 		},
 	} {
-		t.Run(fmt.Sprintf("%s", tt.Scenario), func(t *testing.T) {
+		t.Run(tt.Scenario, func(t *testing.T) {
 			c := &gin.Context{
 				Request: &http.Request{
 					Method: tt.Method,

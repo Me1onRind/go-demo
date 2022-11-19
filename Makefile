@@ -9,3 +9,6 @@ lint:
 
 mock:
 	mockgen --source ./internal/infrastructure/client/etcd/etcd.go --destination ./internal/infrastructure/client/etcd/mock_etcd.go --package etcd
+
+test:
+	go test ./...
