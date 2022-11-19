@@ -3,11 +3,7 @@ package dymconfig
 import (
 	"context"
 	"testing"
-	"time"
 
-	"github.com/Me1onRind/go-demo/internal/global/gconfig"
-	"github.com/Me1onRind/go-demo/internal/infrastructure/client/etcd"
-	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -36,21 +32,4 @@ func Test_UnmarshalBySuffix_Yaml(t *testing.T) {
 		assert.Equal(t, "str_test", t1.Str)
 		assert.Equal(t, []int{1, 2, 3}, t1.IntSlice)
 	}
-}
-
-func Test_AssociateEtcd(t *testing.T) {
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
-	cli := etcd.NewMockClient(ctrl)
-	cli.EXPECT().Get(gomock.Any(), "/test.json", time.Second*2).
-		Return([]byte(`{"str":"str_test","int_slice":[1,2,3]}`), nil)
-
-	gconfig.LocalFileCfg.Etcd.ReadTimeout = time.Second * 2
-
-	ctx := context.Background()
-	t1 := &testCfg{}
-	err := AssociateEtcd(ctx, cli, "/test.json", t1)
-	assert.Empty(t, err)
-	assert.Equal(t, "str_test", t1.Str)
-	assert.Equal(t, []int{1, 2, 3}, t1.IntSlice)
 }

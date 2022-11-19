@@ -27,10 +27,12 @@ func (e *Error) Error() string {
 	return fmt.Sprintf("%s, cause:[%s]", e.message, e.cause.Error())
 }
 
-func (e *Error) Warp(err error) {
-	e.cause = err
-}
-
 func (e *Error) Unwrap() error {
 	return e.cause
+}
+
+func (e *Error) Warp(err error) error {
+	newE := *e
+	newE.cause = err
+	return &newE
 }

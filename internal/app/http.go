@@ -8,6 +8,7 @@ import (
 	"github.com/Me1onRind/go-demo/internal/initialize"
 	"github.com/Me1onRind/go-demo/internal/usecase/unexpectuc"
 	"github.com/Me1onRind/go-demo/internal/usecase/useruc"
+	"github.com/Me1onRind/go-demo/protocol/userproto"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 )
@@ -37,7 +38,7 @@ func (h *HttpServer) RegisterMiddleware(r *gin.Engine) *HttpServer {
 func (h *HttpServer) ReigsterRouter(router *gin.RouterGroup) *HttpServer {
 	router = router.Group("/api")
 	userGroup := router.Group("/user")
-	userGroup.GET("get_user_detail", middleware.JSON(h.UserUsecase.QueryUserInfo, nil))
+	userGroup.GET("get_user_detail", middleware.JSON(h.UserUsecase.GetUserDetail, &userproto.GetUserDetailReq{}))
 
 	unexpectGroup := router.Group("/unexpect")
 	unexpectGroup.GET("/panic", middleware.JSON(h.UnexpectUsecase.Panic, nil))

@@ -13,10 +13,12 @@ func LogPanicStack(ctx context.Context, err any) {
 }
 
 func SafeGo(ctx context.Context, f func()) {
-	defer func() {
-		if err := recover(); err != nil {
-			LogPanicStack(ctx, err)
-		}
+	go func() {
+		defer func() {
+			if err := recover(); err != nil {
+				LogPanicStack(ctx, err)
+			}
+		}()
 		f()
 	}()
 }
