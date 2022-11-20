@@ -53,8 +53,8 @@ func Test_Transaction(t *testing.T) {
 
 	db, _ := newMysqlClusterClientByDialector(masterResource, []gorm.Dialector{})
 	db2, _ := newMysqlClusterClientByDialector(masterResource2, []gorm.Dialector{})
-	setDBLabel(db, "t_label")
-	setDBLabel(db2, "t_label_1")
+	assert.Empty(t, setDBLabel(db, "t_label"))
+	assert.Empty(t, setDBLabel(db2, "t_label_1"))
 
 	t.Run("no_t=>t=>no_t", func(t *testing.T) {
 		ctx := context.Background()

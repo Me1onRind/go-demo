@@ -106,10 +106,12 @@ func newMysqlClusterClientByDialector(source gorm.Dialector, replicas []gorm.Dia
 	}
 
 	if len(replicas) > 0 {
-		db.Use(dbresolver.Register(dbresolver.Config{
+		if err := db.Use(dbresolver.Register(dbresolver.Config{
 			Replicas: replicas,
 			Policy:   dbresolver.RandomPolicy{},
-		}))
+		})); err != nil {
+			return nil, err
+		}
 	}
 	return db, nil
 }
