@@ -11,7 +11,7 @@ import (
 func Test_Wrap_Success(t *testing.T) {
 	message := "My Error"
 	e := NewError(200, message)
-	newE := e.Warp(io.EOF)
+	newE := e.Wrap(io.EOF)
 	t.Log(newE)
 	assert.Equal(t, true, errors.Is(newE, io.EOF))
 	assert.Equal(t, "My Error, cause:[EOF]", newE.Error())
@@ -19,7 +19,7 @@ func Test_Wrap_Success(t *testing.T) {
 
 func Test_Errors_As(t *testing.T) {
 	e := NewError(200, "test")
-	err := e.Warp(io.EOF)
+	err := e.Wrap(io.EOF)
 
 	var customErr *Error
 	assert.Equal(t, true, errors.As(err, &customErr))

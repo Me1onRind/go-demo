@@ -7,4 +7,10 @@ const (
 	JsonEncodeFail     = -10000001
 	JsonDecodeFail     = -10000002
 	ProtocolDecodeFail = -10000003
+	ReadDBFail         = -10000004
+	WriteDBFail        = -10000005
 )
+
+func IsWarning(code int32) bool {
+	return code > Success
+}

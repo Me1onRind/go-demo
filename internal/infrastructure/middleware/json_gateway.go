@@ -7,9 +7,9 @@ import (
 	"net/http"
 	"reflect"
 
-	"github.com/Me1onRind/go-demo/constant/code"
 	"github.com/Me1onRind/go-demo/internal/infrastructure/logger"
 	customErr "github.com/Me1onRind/go-demo/internal/model/errors"
+	"github.com/Me1onRind/go-demo/protocol/code"
 	"github.com/gin-gonic/gin"
 	jsoniter "github.com/json-iterator/go"
 )

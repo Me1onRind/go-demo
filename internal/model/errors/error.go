@@ -31,7 +31,7 @@ func (e *Error) Unwrap() error {
 	return e.cause
 }
 
-func (e *Error) Warp(err error) error {
+func (e *Error) Wrap(err error) error {
 	newE := *e
 	newE.cause = err
 	return &newE

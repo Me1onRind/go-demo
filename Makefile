@@ -14,3 +14,7 @@ mock:
 
 test:
 	@go test $(NEED_TEST_DIR)
+
+test_cover:
+	@go test $(NEED_TEST_DIR) -coverprofile=/tmp/go_test.out
+	go tool cover -html=/tmp/go_test.out -o=/root/share/coverage.html

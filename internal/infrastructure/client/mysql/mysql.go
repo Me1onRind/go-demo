@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/Me1onRind/go-demo/internal/infrastructure/logger"
 	"github.com/Me1onRind/go-demo/internal/model/configmd"
 	"gorm.io/driver/mysql"
@@ -31,7 +32,7 @@ func NewMysqlClusterClient(cfg *configmd.DBCluster) (*gorm.DB, error) {
 		return nil, err
 	}
 
-	if err := setDBLabel(db, cfg.Label); err != nil {
+	if err := setDBLabel(db, cfg.Label, true); err != nil {
 		return nil, err
 	}
 
@@ -85,12 +86,12 @@ func Transaction(ctx context.Context, dbLabel string, f TransactionHandler) (err
 	return err
 }
 
-func setDBLabel(db *gorm.DB, label string) error {
+func setDBLabel(db *gorm.DB, label string, checkDuplicate bool) error {
 	if len(label) == 0 {
 		return fmt.Errorf("DB label is empty")
 	}
 
-	if _, ok := dbs[label]; ok {
+	if _, ok := dbs[label]; checkDuplicate && ok {
 		return fmt.Errorf("DB label:[%s] is existed", label)
 	}
 	dbs[label] = db
@@ -114,4 +115,13 @@ func newMysqlClusterClientByDialector(source gorm.Dialector, replicas []gorm.Dia
 		}
 	}
 	return db, nil
+}
+
+func NewMysqlMock(label string) sqlmock.Sqlmock {
+	sqlDb, mock, _ := sqlmock.New()
+	mock.ExpectQuery("SELECT VERSION").WillReturnRows(sqlmock.NewRows([]string{"VERSION"}).AddRow("5.7.32"))
+	masterResource := mysql.New(mysql.Config{Conn: sqlDb})
+	db, _ := newMysqlClusterClientByDialector(masterResource, []gorm.Dialector{})
+	_ = setDBLabel(db, label, false)
+	return mock
 }
