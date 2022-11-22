@@ -29,7 +29,7 @@ var (
 	}
 )
 
-func Test_GetUserById(t *testing.T) {
+func Test_GetUserByUserId(t *testing.T) {
 	tests := []struct {
 		name string
 		data *userpo.User
@@ -56,14 +56,14 @@ func Test_GetUserById(t *testing.T) {
 			userRepo := NewUserRepo()
 
 			if test.err != nil {
-				mock.ExpectQuery("SELECT \\* FROM `user_tab` WHERE id=\\? LIMIT 1").
-					WithArgs(1).WillReturnError(test.err)
+				mock.ExpectQuery("SELECT \\* FROM `user_tab` WHERE user_id=\\? LIMIT 1").
+					WithArgs(166).WillReturnError(test.err)
 			} else {
-				mock.ExpectQuery("SELECT \\* FROM `user_tab` WHERE id=\\? LIMIT 1").
-					WithArgs(1).WillReturnRows(sqlmock_rows_helper.ModelToRows(test.data))
+				mock.ExpectQuery("SELECT \\* FROM `user_tab` WHERE user_id=\\? LIMIT 1").
+					WithArgs(166).WillReturnRows(sqlmock_rows_helper.ModelToRows(test.data))
 			}
 
-			user, err := userRepo.GetUserById(context.Background(), 1)
+			user, err := userRepo.GetUserByUserId(context.Background(), 166)
 			if test.err != nil {
 				assert.Empty(t, user)
 				assert.ErrorIs(t, err, test.err)

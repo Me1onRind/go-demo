@@ -1,5 +1,5 @@
 package dblabel
 
 const (
-	Default = "go-demo"
+	Default = "default"
 )

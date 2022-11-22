@@ -46,7 +46,11 @@ func GetDB(ctx context.Context, dbLabel string) *gorm.DB {
 		return tx.(*gorm.DB)
 	}
 
-	return dbs[dbLabel]
+	db := dbs[dbLabel]
+	if db == nil {
+		panic(fmt.Sprintf("DB label:[%s] not exist", dbLabel))
+	}
+	return db
 }
 
 func Transaction(ctx context.Context, dbLabel string, f TransactionHandler) (err error) {

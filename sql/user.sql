@@ -6,5 +6,5 @@ CREATE TABLE `user_tab` (
     `create_time` INT(10) UNSIGNED NOT NULL DEFAULT 0,
     `update_time` INT(10) UNSIGNED NOT NULL DEFAULT 0,
     PRIMARY KEY(`id`),
-    UNIQ KEY uniq_user_id(`user_id`)
+    UNIQUE KEY uniq_user_id(`user_id`)
 ) ENGINE=InnoDB CHARSET=utf8mb4;

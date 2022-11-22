@@ -50,6 +50,7 @@ func (h *HttpServer) Init() *HttpServer {
 		initialize.InitFileConfig("./conf.yml"),
 		initialize.InitEtcdClient(),
 		initialize.InitDynamicConfig(),
+		initialize.InitMysqlClient(),
 	}
 	ctx := context.Background()
 	ctx = logger.WithFields(ctx, logrus.Fields{

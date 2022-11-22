@@ -10,23 +10,23 @@ import (
 	"github.com/Me1onRind/go-demo/internal/model/po/userpo"
 )
 
-type UserRespo struct {
+type UserRepo struct {
 }
 
-func NewUserRepo() *UserRespo {
-	return &UserRespo{}
+func NewUserRepo() *UserRepo {
+	return &UserRepo{}
 }
 
-func (u *UserRespo) GetUserById(ctx context.Context, id uint64) (*userpo.User, error) {
+func (u *UserRepo) GetUserByUserId(ctx context.Context, userId uint64) (*userpo.User, error) {
 	user := &userpo.User{}
-	if err := mysql.GetDB(ctx, dblabel.Default).Take(user, "id=?", id).Error; err != nil {
-		logger.CtxErrorf(ctx, "GetUserById fail, id:[%d], case:[%s]", id, err)
+	if err := mysql.GetDB(ctx, dblabel.Default).Take(user, "user_id=?", userId).Error; err != nil {
+		logger.CtxErrorf(ctx, "GetUserById fail, user_id:[%d], case:[%s]", userId, err)
 		return nil, gerror.ReadDBError.Wrap(err)
 	}
 	return user, nil
 }
 
-func (u *UserRespo) CreateUser(ctx context.Context, user *userpo.User) (*userpo.User, error) {
+func (u *UserRepo) CreateUser(ctx context.Context, user *userpo.User) (*userpo.User, error) {
 	if err := mysql.GetDB(ctx, dblabel.Default).Create(user).Error; err != nil {
 		logger.CtxErrorf(ctx, "CreateUser fail, user:[%+v], case:[%s]", user, err)
 		return nil, gerror.WriteDBError.Wrap(err)
