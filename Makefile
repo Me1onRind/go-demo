@@ -1,4 +1,4 @@
-NEED_TEST_DIR=$(shell go list ./...|grep -v -e "github.com/Me1onRind/go-demo/\(internal/usecase\|protocol\|internal/infrastructure/logger\)")
+#NEED_TEST_DIR=$(shell go list ./...|grep -v -e "github.com/Me1onRind/go-demo/\(internal/usecase\|protocol\|internal/infrastructure/logger\|internal/infrastructure/client\)")
 
 http_run:
 	go run ./cmd/http/main.go
@@ -13,8 +13,11 @@ mock:
 	mockgen --source ./internal/infrastructure/client/etcd/etcd.go --destination ./internal/infrastructure/client/etcd/mock_etcd.go --package etcd
 
 test:
-	@go test $(NEED_TEST_DIR)
+	@skip_io=1 go test ./...
 
 test_cover:
-	@go test $(NEED_TEST_DIR) -coverprofile=/tmp/go_test.out
+	@skip_io=1 go test ./... -coverprofile=/tmp/go_test.out
 	go tool cover -html=/tmp/go_test.out -o=/root/share/coverage.html
+
+generate:
+	go generate ./...

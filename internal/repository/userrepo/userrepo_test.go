@@ -3,10 +3,11 @@ package userrepo
 import (
 	"context"
 	"io"
+	"os"
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
-	"github.com/Me1onRind/go-demo/internal/constant/dblabel"
+	"github.com/Me1onRind/go-demo/internal/global/gconfig"
 	"github.com/Me1onRind/go-demo/internal/infrastructure/client/mysql"
 	"github.com/Me1onRind/go-demo/internal/infrastructure/unittest"
 	"github.com/Me1onRind/go-demo/internal/model/po"
@@ -29,6 +30,11 @@ var (
 	}
 )
 
+func TestMain(m *testing.M) {
+	gconfig.DynamicCfg.DefaultDB.Label = "default"
+	os.Exit(m.Run())
+}
+
 func Test_GetUserByUserId(t *testing.T) {
 	tests := []struct {
 		name string
@@ -49,11 +55,11 @@ func Test_GetUserByUserId(t *testing.T) {
 		},
 	}
 
-	mock := mysql.NewMysqlMock(dblabel.Default)
+	userRepo := NewUserRepo()
+	mock := mysql.NewMysqlMock(userRepo.dbLabel())
 	defer assert.Empty(t, mock.ExpectationsWereMet())
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			userRepo := NewUserRepo()
 
 			if test.err != nil {
 				mock.ExpectQuery("SELECT \\* FROM `user_tab` WHERE user_id=\\? LIMIT 1").
@@ -92,12 +98,12 @@ func Test_CreateUser(t *testing.T) {
 		},
 	}
 
-	mock := mysql.NewMysqlMock(dblabel.Default)
+	userRepo := NewUserRepo()
+	mock := mysql.NewMysqlMock(userRepo.dbLabel())
 	defer assert.Empty(t, mock.ExpectationsWereMet())
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			userRepo := NewUserRepo()
 
 			if test.err != nil {
 				mock.ExpectExec("INSERT INTO `user_tab` \\(`create_time`,`update_time`,`user_id`,`name`\\) VALUES \\(\\?,\\?,\\?,\\?\\)").

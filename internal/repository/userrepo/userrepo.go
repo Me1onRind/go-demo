@@ -3,7 +3,7 @@ package userrepo
 import (
 	"context"
 
-	"github.com/Me1onRind/go-demo/internal/constant/dblabel"
+	"github.com/Me1onRind/go-demo/internal/global/gconfig"
 	"github.com/Me1onRind/go-demo/internal/global/gerror"
 	"github.com/Me1onRind/go-demo/internal/infrastructure/client/mysql"
 	"github.com/Me1onRind/go-demo/internal/infrastructure/logger"
@@ -17,9 +17,13 @@ func NewUserRepo() *UserRepo {
 	return &UserRepo{}
 }
 
+func (u *UserRepo) dbLabel() string {
+	return gconfig.DynamicCfg.DefaultDB.Label
+}
+
 func (u *UserRepo) GetUserByUserId(ctx context.Context, userId uint64) (*userpo.User, error) {
 	user := &userpo.User{}
-	if err := mysql.GetDB(ctx, dblabel.Default).Take(user, "user_id=?", userId).Error; err != nil {
+	if err := mysql.GetDB(ctx, u.dbLabel()).Take(user, "user_id=?", userId).Error; err != nil {
 		logger.CtxErrorf(ctx, "GetUserById fail, user_id:[%d], case:[%s]", userId, err)
 		return nil, gerror.ReadDBError.Wrap(err)
 	}
@@ -27,7 +31,7 @@ func (u *UserRepo) GetUserByUserId(ctx context.Context, userId uint64) (*userpo.
 }
 
 func (u *UserRepo) CreateUser(ctx context.Context, user *userpo.User) (*userpo.User, error) {
-	if err := mysql.GetDB(ctx, dblabel.Default).Create(user).Error; err != nil {
+	if err := mysql.GetDB(ctx, u.dbLabel()).Create(user).Error; err != nil {
 		logger.CtxErrorf(ctx, "CreateUser fail, user:[%+v], case:[%s]", user, err)
 		return nil, gerror.WriteDBError.Wrap(err)
 	}
