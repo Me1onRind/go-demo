@@ -33,3 +33,27 @@ func Test_UnmarshalBySuffix_Yaml(t *testing.T) {
 		assert.Equal(t, []int{1, 2, 3}, t1.IntSlice)
 	}
 }
+
+func Test_UnmarshalBySuffix_Faile(t *testing.T) {
+	tests := []struct {
+		name string
+		key  string
+		body []byte
+	}{
+		{
+			name: "wrong suffix",
+			key:  "test.xml",
+		},
+		{
+			name: "wrong body",
+			key:  "test.json",
+			body: []byte(`{"str":"str_test","int_slice":[1,2,3],1}`),
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			assert.NotEmpty(t, unmarshalBySuffix(context.Background(), test.key, test.body, &testCfg{}))
+		})
+	}
+}

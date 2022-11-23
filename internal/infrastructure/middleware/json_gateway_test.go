@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"net/http"
@@ -41,6 +42,12 @@ func Test_GetResponse(t *testing.T) {
 			ExpectCode: 1,
 			ExpectData: map[string]any{"name": "werjhwe"},
 		},
+		{
+			Scenario:   "unexpect",
+			Data:       map[string]any{"name": "werjhwe"},
+			Err:        fmt.Errorf("????????"),
+			ExpectCode: -10000000,
+		},
 	} {
 		t.Run(fmt.Sprintf("%s_response", tt.Scenario), func(t *testing.T) {
 			r := getResponse(tt.Data, tt.Err)
@@ -59,54 +66,54 @@ func Test_NewProtocolStruct(t *testing.T) {
 		SliceInt []int  `json:"slice_int" form:"slice_int"`
 	}
 
-	for _, tt := range []struct {
-		Raw                string
-		Method             string
-		Scenario           string
-		Protocol           any
-		ContentType        string
-		ExpectValue        any
-		ExpectEmptyErr     bool
-		OriginZeroProtocol any
+	for _, test := range []struct {
+		name               string
+		raw                string
+		method             string
+		protocol           any
+		contentType        string
+		expectValue        any
+		expectEmptyErr     bool
+		originZeroProtocol any
 	}{
 		{
-			Raw:         `{"name":"l1","value":123,"slice":[{"name":"l2","value":321}]}`,
-			Method:      "POST",
-			ContentType: "application/json",
-			Scenario:    "post_json",
-			Protocol:    &P{},
-			ExpectValue: &P{Name: "l1", Value: 123, Slice: []*P{
+			name:        "post_json",
+			raw:         `{"name":"l1","value":123,"slice":[{"name":"l2","value":321}]}`,
+			method:      "POST",
+			contentType: "application/json",
+			protocol:    &P{},
+			expectValue: &P{Name: "l1", Value: 123, Slice: []*P{
 				{Name: "l2", Value: 321},
 			}},
-			OriginZeroProtocol: &P{},
+			originZeroProtocol: &P{},
 		},
 		{
-			Raw:                `name=l1&value=123&slice_int=1&slice_int=2`,
-			Method:             "GET",
-			ContentType:        "application/json",
-			Scenario:           "get",
-			Protocol:           &P{},
-			ExpectValue:        &P{Name: "l1", Value: 123, SliceInt: []int{1, 2}},
-			OriginZeroProtocol: &P{},
+			raw:                `name=l1&value=123&slice_int=1&slice_int=2`,
+			method:             "GET",
+			contentType:        "application/json",
+			name:               "get",
+			protocol:           &P{},
+			expectValue:        &P{Name: "l1", Value: 123, SliceInt: []int{1, 2}},
+			originZeroProtocol: &P{},
 		},
 	} {
-		t.Run(tt.Scenario, func(t *testing.T) {
+		t.Run(test.name, func(t *testing.T) {
 			c := &gin.Context{
 				Request: &http.Request{
-					Method: tt.Method,
+					Method: test.method,
 					Header: http.Header{
-						"Content-Type": []string{tt.ContentType},
+						"Content-Type": []string{test.contentType},
 					},
-					Body: io.NopCloser(strings.NewReader(tt.Raw)),
+					Body: io.NopCloser(strings.NewReader(test.raw)),
 					URL: &url.URL{
-						RawQuery: tt.Raw,
+						RawQuery: test.raw,
 					},
 				},
 			}
-			newValue, err := initProtocol(c, tt.Protocol)
+			newValue, err := initProtocol(c, test.protocol)
 			assert.Empty(t, err)
-			assert.Equal(t, true, assert.ObjectsAreEqualValues(tt.ExpectValue, newValue))
-			assert.Equal(t, true, assert.ObjectsAreEqualValues(tt.Protocol, tt.OriginZeroProtocol))
+			assert.Equal(t, true, assert.ObjectsAreEqualValues(test.expectValue, newValue))
+			assert.Equal(t, true, assert.ObjectsAreEqualValues(test.protocol, test.originZeroProtocol))
 		})
 	}
 
@@ -147,6 +154,57 @@ func Test_newProtocol(t *testing.T) {
 				assert.Empty(t, n)
 				assert.NotEmpty(t, err)
 			}
+		})
+	}
+}
+
+func Test_jsonGateWay(t *testing.T) {
+	tests := []struct {
+		name     string
+		protocol any
+		handler  HTTPHandler
+		result   []byte
+	}{
+		{
+			name: "success",
+			handler: func(context.Context, any) (any, error) {
+				return map[string]any{"name": "f"}, nil
+			},
+			result: []byte(`{"code":0,"message":"Success","data":{"name":"f"}}`),
+		},
+		{
+			name:     "protocol decode failed",
+			protocol: 3,
+			handler: func(context.Context, any) (any, error) {
+				return map[string]any{"name": "f"}, nil
+			},
+			result: []byte(`{"code":-10000003,"message":"Decode request text fail, cause:[New protocol:[3] struct fail, cause it's type:[int] not support]","data":null}`),
+		},
+		{
+			name: "should bind fail",
+			protocol: struct {
+				A string `form:"a" binding:"required"`
+			}{},
+			handler: func(context.Context, any) (any, error) {
+				return map[string]any{"name": "f"}, nil
+			},
+			result: []byte(`{"code":-10000003,"message":"Decode request text fail, cause:[Key: 'A' Error:Field validation for 'A' failed on the 'required' tag]","data":null}`),
+		},
+		{
+			name: "json encode failed",
+			handler: func(context.Context, any) (any, error) {
+				return struct{ T func() }{T: func() {}}, nil
+			},
+			result: []byte(`{"code":-10000001,"message":"JSON Gateway encode response fail, err:[middleware.JsonResponse.Data: struct { T func() }.T:  Tfunc() is unsupported type]","data":null}`),
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			c := &gin.Context{}
+			c.Request, _ = http.NewRequestWithContext(context.Background(), "GET", "", nil)
+			t.Logf("%s", jsonGateWay(c, test.handler, test.protocol))
+			assert.Equal(t, test.result, jsonGateWay(c, test.handler, test.protocol))
 		})
 	}
 }

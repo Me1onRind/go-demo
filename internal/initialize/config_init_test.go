@@ -20,3 +20,21 @@ func Test_Load_Local_File_Cfg(t *testing.T) {
 		assert.Equal(t, time.Second*5, gconfig.LocalFileCfg.Etcd.DialTimeout)
 	}
 }
+
+func Test_Load_Local_File_Cfg_Error(t *testing.T) {
+	tests := []struct {
+		name     string
+		filepath string
+	}{
+		{
+			name:     "open failed",
+			filepath: "./config_test.json",
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			assert.NotEmpty(t, InitFileConfig(test.filepath)(context.Background()))
+		})
+	}
+}

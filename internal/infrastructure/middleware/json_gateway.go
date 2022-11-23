@@ -24,32 +24,36 @@ type HTTPHandler func(c context.Context, raw any) (data any, err error)
 
 func JSON(handler HTTPHandler, protocol any) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var response *JsonResponse
-		ctx := mustGetGinExtractContext(c)
-
-		raw, err := initProtocol(c, protocol)
-		if err != nil {
-			response = &JsonResponse{
-				Code:    code.ProtocolDecodeFail,
-				Message: fmt.Sprintf("Decode request text fail, cause:[%s]", err),
-			}
-		} else {
-			data, err := handler(ctx, raw)
-			response = getResponse(data, err)
-		}
-
-		jsonData, err := jsoniter.Marshal(response)
-		if err != nil {
-			logger.CtxErrorf(ctx, "Marshal response fail, err:[%s]", err)
-			jsonData, _ = jsoniter.Marshal(&JsonResponse{
-				Code:    code.JsonEncodeFail,
-				Message: fmt.Sprintf("JSON Gateway encode response fail, err:[%s]", err.Error()),
-			})
-		}
-
-		c.Data(http.StatusOK, "application/json; charset=utf-8", jsonData)
+		c.Data(http.StatusOK, "application/json; charset=utf-8", jsonGateWay(c, handler, protocol))
 		c.Next()
 	}
+}
+
+func jsonGateWay(c *gin.Context, handler HTTPHandler, protocol any) []byte {
+	ctx := mustGetGinExtractContext(c)
+
+	var response *JsonResponse
+	raw, err := initProtocol(c, protocol)
+
+	if err != nil {
+		response = &JsonResponse{
+			Code:    code.ProtocolDecodeFail,
+			Message: fmt.Sprintf("Decode request text fail, cause:[%s]", err),
+		}
+	} else {
+		data, err := handler(ctx, raw)
+		response = getResponse(data, err)
+	}
+
+	jsonData, err := jsoniter.Marshal(response)
+	if err != nil {
+		logger.CtxErrorf(ctx, "Marshal response fail, err:[%s]", err)
+		jsonData, _ = jsoniter.Marshal(&JsonResponse{
+			Code:    code.JsonEncodeFail,
+			Message: fmt.Sprintf("JSON Gateway encode response fail, err:[%s]", err.Error()),
+		})
+	}
+	return jsonData
 }
 
 func getResponse(data any, err error) *JsonResponse {
@@ -75,6 +79,9 @@ func getResponse(data any, err error) *JsonResponse {
 }
 
 func initProtocol(c *gin.Context, protocol any) (any, error) {
+	if protocol == nil {
+		return nil, nil
+	}
 	entity, err := newProtocol(protocol)
 	if err != nil {
 		return nil, err

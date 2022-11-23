@@ -157,3 +157,33 @@ func Test_Transaction(t *testing.T) {
 
 	assert.Empty(t, mock.ExpectationsWereMet())
 }
+
+func Test_GetDB_Panic(t *testing.T) {
+	assert.Panics(t, func() {
+		GetDB(context.Background(), "db")
+	},
+	)
+}
+
+func Test_SetDBLabel(t *testing.T) {
+	assert.Empty(t, setDBLabel(&gorm.DB{}, "d", true))
+	tests := []struct {
+		name  string
+		label string
+	}{
+		{
+			name:  "label zero",
+			label: "",
+		},
+		{
+			name:  "duplicate",
+			label: "d",
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			assert.NotEmpty(t, setDBLabel(&gorm.DB{}, test.label, true))
+		})
+	}
+}
