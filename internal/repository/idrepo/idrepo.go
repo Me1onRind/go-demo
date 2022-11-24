@@ -18,7 +18,7 @@ func NewIdRepo() *IdRepo {
 }
 
 func (i *IdRepo) dbLabel() string {
-	return gconfig.DynamicCfg.DefaultDB.Label
+	return gconfig.DynamicCfg.DefaultDB.GetLabel()
 }
 
 func (i *IdRepo) GetIdRecord(ctx context.Context, idType idpo.IdType) (*idpo.IdCreator, error) {
@@ -30,8 +30,8 @@ func (i *IdRepo) GetIdRecord(ctx context.Context, idType idpo.IdType) (*idpo.IdC
 	return &record, nil
 }
 
-func (i *IdRepo) UpdateOffset(ctx context.Context, idType idpo.IdType, oldOffset, step int32) (int64, error) {
-	db := mysql.GetDB(ctx, i.dbLabel()).Model(&idpo.IdCreator{}).Where("id_type=? AND offset=?", idType, oldOffset).Update("offset", oldOffset+step)
+func (i *IdRepo) UpdateOffset(ctx context.Context, idType idpo.IdType, oldOffset uint64, step uint32) (int64, error) {
+	db := mysql.GetDB(ctx, i.dbLabel()).Model(&idpo.IdCreator{}).Where("id_type=? AND offset=?", idType, oldOffset).Update("offset", oldOffset+uint64(step))
 	if err := db.Error; err != nil {
 		logger.CtxErrorf(ctx, "UpdateOffset fail, id_type:[%d], old_offset:[%d], step:[%d] case:[%s]", oldOffset, step, idType, err)
 		return 0, gerror.WriteDBError.Wrap(err)

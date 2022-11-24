@@ -2,45 +2,117 @@ package iddm
 
 import (
 	"context"
+	"errors"
 	"sync"
 
+	"github.com/Me1onRind/go-demo/internal/global/gerror"
+	"github.com/Me1onRind/go-demo/internal/infrastructure/logger"
 	"github.com/Me1onRind/go-demo/internal/model/po/idpo"
 	"github.com/Me1onRind/go-demo/internal/repository/idrepo"
 )
 
-var once = sync.Once{}
-var instance *IdDomain
+var (
+	once                 = sync.Once{}
+	instance             *idDomain
+	ErrGetPoolFromDBFail = errors.New("Get id pool from database fail, may try too much times")
+	ErrPoolStepIsZero    = errors.New("Id pool step is zero")
+)
 
-type IdDomain struct {
+type idDomain struct {
 	IdRepo *idrepo.IdRepo
-	Step   uint64
+	Mutex  *sync.RWMutex
+	pools  map[idpo.IdType]*idPool
+}
+
+type idPool struct {
+	Mutex  *sync.Mutex
 	Max    uint64
 	Offset uint64
 	Count  uint64
-	Mutex  *sync.Mutex
 }
 
-func NewIdDomain() *IdDomain {
+func (i *idPool) getId() (uint64, bool) {
+	id := i.Count + i.Offset
+	if id >= i.Max {
+		return 0, false
+	}
+	i.Count++
+	return id, true
+}
+
+type IdDomain interface {
+	GetId(ctx context.Context, idType idpo.IdType, maxRetry int) (uint64, error)
+}
+
+func NewIdDomain() IdDomain {
 	once.Do(func() {
-		instance = &IdDomain{
-			Mutex: &sync.Mutex{},
+		instance = &idDomain{
+			pools: map[idpo.IdType]*idPool{},
+			Mutex: &sync.RWMutex{},
 		}
 	})
 	return instance
 }
 
-func (i *IdDomain) GetId(ctx context.Context, idType idpo.IdType, maxRetry int) (uint64, error) {
-	var (
-		err error
-		id  uint64
-	)
-	i.Mutex.Lock()
-	defer i.Mutex.Unlock()
-	for j := 0; j < maxRetry; j++ {
-		tmpId := i.Count + i.Offset
-		if tmpId < i.Max {
-			id = tmpId
-		}
+func (i *idDomain) getPool(idType idpo.IdType) *idPool {
+	i.Mutex.RLock()
+	pool := i.pools[idType]
+	i.Mutex.RUnlock()
+	if pool != nil {
+		return pool
 	}
-	return id, err
+
+	pool = &idPool{
+		Mutex: &sync.Mutex{},
+	}
+	i.Mutex.Lock()
+	i.pools[idType] = pool
+	i.Mutex.Unlock()
+	return pool
+}
+
+func (i *idDomain) GetId(ctx context.Context, idType idpo.IdType, maxTry int) (uint64, error) {
+	if maxTry <= 0 {
+		maxTry = 1
+	}
+
+	pool := i.getPool(idType)
+	pool.Mutex.Lock()
+	defer pool.Mutex.Unlock()
+
+	id, ok := pool.getId()
+	if ok {
+		return id, nil
+	}
+
+	for j := 0; j < maxTry; j++ {
+		record, err := i.IdRepo.GetIdRecord(ctx, idType)
+		if err != nil {
+			return 0, err
+		}
+
+		if record.Step == 0 {
+			logger.CtxErrorf(ctx, "Id pool is invalid, idType:[%d]", idType)
+			return 0, gerror.GenerateIdError.Wrap(ErrPoolStepIsZero)
+		}
+
+		rows, err := i.IdRepo.UpdateOffset(ctx, idType, record.Offset, record.Step)
+		if err != nil {
+			return 0, err
+		}
+
+		if rows == 0 {
+			logger.CtxWarnf(ctx, "UpdateOffset affectRows is zero, id_type:[%d], Offset[%d], step:[%d], times[%d], retryTimes[%d]",
+				idType, record.Offset, record.Step, j+1, maxTry)
+			continue
+		}
+
+		pool.Max = record.Offset + uint64(record.Step)
+		pool.Count = 0
+		pool.Offset = record.Offset
+		id, _ := pool.getId()
+		return id, nil
+	}
+
+	return 0, gerror.GenerateIdError.Wrap(ErrGetPoolFromDBFail)
 }

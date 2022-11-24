@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
-	sqlmock_rows_helper "github.com/Me1onRind/sqlmock-rows-helper"
+	sqlmock_gorm_helper "github.com/Me1onRind/sqlmock-gorm-helper"
 	"github.com/stretchr/testify/assert"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -56,7 +56,7 @@ func Test_Transaction(t *testing.T) {
 
 		// transaction, begin -> select -> update -> commit
 		mock.ExpectBegin()
-		mock.ExpectQuery("SELECT \\* FROM `test_models` LIMIT 1").WillReturnRows(sqlmock_rows_helper.ModelToRows(TestModel{Id: 1, Name: "test"}))
+		mock.ExpectQuery("SELECT \\* FROM `test_models` LIMIT 1").WillReturnRows(sqlmock_gorm_helper.ModelToRows(TestModel{Id: 1, Name: "test"}))
 		mock.ExpectExec("UPDATE `test_models` SET `name`=\\? WHERE id>\\?").WithArgs("new name", 50).
 			WillReturnResult(sqlmock.NewResult(0, 100))
 		mock.ExpectCommit()

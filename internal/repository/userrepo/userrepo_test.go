@@ -12,7 +12,7 @@ import (
 	"github.com/Me1onRind/go-demo/internal/infrastructure/unittest"
 	"github.com/Me1onRind/go-demo/internal/model/po"
 	"github.com/Me1onRind/go-demo/internal/model/po/userpo"
-	sqlmock_rows_helper "github.com/Me1onRind/sqlmock-rows-helper"
+	sqlmockGormHelper "github.com/Me1onRind/sqlmock-gorm-helper"
 	mysqlDriver "github.com/go-sql-driver/mysql"
 	"github.com/stretchr/testify/assert"
 	"gorm.io/gorm"
@@ -66,7 +66,7 @@ func Test_GetUserByUserId(t *testing.T) {
 					WithArgs(166).WillReturnError(test.err)
 			} else {
 				mock.ExpectQuery("SELECT \\* FROM `user_tab` WHERE user_id=\\? LIMIT 1").
-					WithArgs(166).WillReturnRows(sqlmock_rows_helper.ModelToRows(test.data))
+					WithArgs(166).WillReturnRows(sqlmockGormHelper.ModelToRows(test.data))
 			}
 
 			user, err := userRepo.GetUserByUserId(context.Background(), 166)
@@ -106,11 +106,11 @@ func Test_CreateUser(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 
 			if test.err != nil {
-				mock.ExpectExec("INSERT INTO `user_tab` \\(`create_time`,`update_time`,`user_id`,`name`\\) VALUES \\(\\?,\\?,\\?,\\?\\)").
-					WithArgs(unittest.NewGreater(int64(0)), unittest.NewGreater(int64(0)), 167, "test_name").WillReturnError(test.err)
+				mock.ExpectExec(sqlmockGormHelper.InsertSql(userpo.User{}, `user_tab`)).
+					WithArgs(unittest.Now{}, unittest.Now{}, 167, "test_name").WillReturnError(test.err)
 			} else {
-				mock.ExpectExec("INSERT INTO `user_tab` \\(`create_time`,`update_time`,`user_id`,`name`\\) VALUES \\(\\?,\\?,\\?,\\?\\)").
-					WithArgs(unittest.NewGreater(int64(0)), unittest.NewGreater(int64(0)), 167, "test_name").WillReturnResult(sqlmock.NewResult(100, 1))
+				mock.ExpectExec(sqlmockGormHelper.InsertSql(userpo.User{}, `user_tab`)).
+					WithArgs(unittest.Now{}, unittest.Now{}, 167, "test_name").WillReturnResult(sqlmock.NewResult(100, 1))
 			}
 
 			user, err := userRepo.CreateUser(context.Background(), test.data)

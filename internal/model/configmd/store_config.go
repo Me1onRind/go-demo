@@ -6,6 +6,10 @@ import (
 	clientv3 "go.etcd.io/etcd/client/v3"
 )
 
+const (
+	DefaultDBLabel = "default"
+)
+
 type EtcdConfig struct {
 	Endpoints   []string      `yaml:"endpoints"`
 	DialTimeout time.Duration `yaml:"dial_timeout"`
@@ -31,6 +35,13 @@ type DBCluster struct {
 	Label  string     `yaml:"label"`
 	Master DBConfig   `yaml:"master"`
 	Slaves []DBConfig `yaml:"slaves"`
+}
+
+func (d *DBCluster) GetLabel() string {
+	if len(d.Label) == 0 {
+		return DefaultDBLabel
+	}
+	return d.Label
 }
 
 type DBConfig struct {

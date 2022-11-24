@@ -18,7 +18,7 @@ func NewUserRepo() *UserRepo {
 }
 
 func (u *UserRepo) dbLabel() string {
-	return gconfig.DynamicCfg.DefaultDB.Label
+	return gconfig.DynamicCfg.DefaultDB.GetLabel()
 }
 
 func (u *UserRepo) GetUserByUserId(ctx context.Context, userId uint64) (*userpo.User, error) {

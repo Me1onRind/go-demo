@@ -11,6 +11,7 @@ lint:
 
 mock:
 	mockgen --source ./internal/infrastructure/client/etcd/etcd.go --destination ./internal/infrastructure/client/etcd/mock_etcd.go --package etcd
+	mockgen --source ./internal/domain/iddm/iddm.go --destination ./internal/domain/iddm/mock_iddm.go --package iddm
 
 test:
 	@skip_io=1 go test ./...

@@ -31,3 +31,13 @@ func (g Greater[T]) Match(v driver.Value) bool {
 	}
 	return value > g.compareValue
 }
+
+type Now struct{}
+
+func (n Now) Match(v driver.Value) bool {
+	now := time.Now().Unix()
+	if value, ok := v.(int64); ok {
+		return now-value < 5 || value-now < 5
+	}
+	return false
+}

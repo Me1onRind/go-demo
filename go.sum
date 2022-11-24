@@ -3,8 +3,8 @@ cloud.google.com/go v0.34.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMT
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/DATA-DOG/go-sqlmock v1.5.0 h1:Shsta01QNfFxHCfpW6YH2STWB0MudeXXEWMr20OEh60=
 github.com/DATA-DOG/go-sqlmock v1.5.0/go.mod h1:f/Ixk793poVmq4qj/V1dPUg2JEAKC73Q5eFN3EC/SaM=
-github.com/Me1onRind/sqlmock-rows-helper v0.0.5 h1:pfp6qVxGF9TpsE1hN7AqKvKHpytx4dOed9MBCCfoEAQ=
-github.com/Me1onRind/sqlmock-rows-helper v0.0.5/go.mod h1:I4GYxLQ7qR6nbh2BmtF1Zejbre2+Cgl+UA4kO7x8A6o=
+github.com/Me1onRind/sqlmock-gorm-helper v0.0.8 h1:ocWJvU7l/eRTGfNIxBD5aS2ZDb/oC3wwg119KOzI3gw=
+github.com/Me1onRind/sqlmock-gorm-helper v0.0.8/go.mod h1:4BVKap3FnP3D3HqyC+PMYwcCqrIyaGJYehs82x7VTYs=
 github.com/alecthomas/template v0.0.0-20160405071501-a0175ee3bccc/go.mod h1:LOuyumcjzFXgccqObfd/Ljyb9UuFJ6TxHnclSeseNhc=
 github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751/go.mod h1:LOuyumcjzFXgccqObfd/Ljyb9UuFJ6TxHnclSeseNhc=
 github.com/alecthomas/units v0.0.0-20151022065526-2efee857e7cf/go.mod h1:ybxpYRFXyAe+OPACYpWeL0wqObRcbAqCMya13uyzqw0=

@@ -7,12 +7,11 @@ import (
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
-	"github.com/Me1onRind/go-demo/internal/global/gconfig"
 	"github.com/Me1onRind/go-demo/internal/infrastructure/client/mysql"
 	"github.com/Me1onRind/go-demo/internal/infrastructure/unittest"
 	"github.com/Me1onRind/go-demo/internal/model/po"
 	"github.com/Me1onRind/go-demo/internal/model/po/idpo"
-	sqlmock_rows_helper "github.com/Me1onRind/sqlmock-rows-helper"
+	sqlmock_gorm_helper "github.com/Me1onRind/sqlmock-gorm-helper"
 	"github.com/stretchr/testify/assert"
 	"gorm.io/gorm"
 )
@@ -31,7 +30,6 @@ var (
 )
 
 func TestMain(m *testing.M) {
-	gconfig.DynamicCfg.DefaultDB.Label = "default"
 	os.Exit(m.Run())
 }
 
@@ -58,7 +56,7 @@ func Test_GetRecord(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			if test.err == nil {
 				mock.ExpectQuery("SELECT \\* FROM `id_creator_tab` WHERE id_type=\\? LIMIT 1").WithArgs(1).
-					WillReturnRows(sqlmock_rows_helper.ModelToRows(UserIdIdCreator))
+					WillReturnRows(sqlmock_gorm_helper.ModelToRows(UserIdIdCreator))
 			} else {
 				mock.ExpectQuery("SELECT \\* FROM `id_creator_tab` WHERE id_type=\\? LIMIT 1").WithArgs(1).
 					WillReturnError(test.err)
@@ -103,10 +101,10 @@ func Test_UpdateRecord(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			if test.err == nil {
 				mock.ExpectExec("UPDATE `id_creator_tab` SET `offset`=\\?,`update_time`=\\? WHERE id_type=\\? AND offset=\\?").
-					WithArgs(1500, unittest.NewGreater(int64(0)), 1, 1000).WillReturnResult(sqlmock.NewResult(0, test.rows))
+					WithArgs(1500, unittest.Now{}, 1, 1000).WillReturnResult(sqlmock.NewResult(0, test.rows))
 			} else {
 				mock.ExpectExec("UPDATE `id_creator_tab` SET `offset`=\\?,`update_time`=\\? WHERE id_type=\\? AND offset=\\?").
-					WithArgs(1500, unittest.NewGreater(int64(0)), 1, 1000).WillReturnError(test.err)
+					WithArgs(1500, unittest.Now{}, 1, 1000).WillReturnError(test.err)
 			}
 
 			rows, err := idRepo.UpdateOffset(context.Background(), idpo.UserIdType, 1000, 500)
