@@ -47,3 +47,17 @@ func (d *DBCluster) GetLabel() string {
 type DBConfig struct {
 	DSN string `yaml:"dsn"`
 }
+
+type RedisConfig struct {
+	Addr         string `yaml:"addr"`
+	Username     string `yaml:"username"`
+	Password     string `yaml:"password"`
+	DB           int
+	DialTimeout  time.Duration
+	ReadTimeout  time.Duration
+	WriteTimeout time.Duration
+	MinIdleConns int
+	MaxConnAge   time.Duration
+	IdleTimeout  time.Duration
+	PoolTimeout  time.Duration
+}
