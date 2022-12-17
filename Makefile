@@ -14,7 +14,7 @@ mock:
 	mockgen --source ./internal/domain/iddm/iddm.go --destination ./internal/domain/iddm/mock_iddm.go --package iddm
 
 test:
-	@skip_io=1 go test ./...
+	@skip_io=1 go test -cover ./...
 
 test_cover:
 	@skip_io=1 go test ./... -coverprofile=/tmp/go_test.out

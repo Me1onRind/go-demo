@@ -47,7 +47,7 @@ func (h *redisHook) AfterProcess(ctx context.Context, cmd redis.Cmder) error {
 		}
 	}
 	startTime := ctx.Value(startTimeKey{}).(time.Time)
-	duration := time.Now().Sub(startTime)
+	duration := time.Since(startTime)
 
 	logger.CtxInfof(ctx, "opt:[%s], key:[%s], params:%v, cost:[%s]", cmd.Name(), key, params, duration)
 	if cmd.Err() != nil && !errors.Is(cmd.Err(), redis.Nil) {

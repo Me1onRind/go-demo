@@ -23,7 +23,7 @@ func (u *UserRepo) dbLabel() string {
 
 func (u *UserRepo) GetUserByUserId(ctx context.Context, userId uint64) (*userpo.User, error) {
 	user := &userpo.User{}
-	if err := mysql.GetDB(ctx, u.dbLabel()).Take(user, "user_id=?", userId).Error; err != nil {
+	if err := mysql.GetReadDB(ctx, u.dbLabel()).Take(user, "user_id=?", userId).Error; err != nil {
 		logger.CtxErrorf(ctx, "GetUserById fail, user_id:[%d], case:[%s]", userId, err)
 		return nil, gerror.ReadDBError.Wrap(err)
 	}
@@ -31,7 +31,7 @@ func (u *UserRepo) GetUserByUserId(ctx context.Context, userId uint64) (*userpo.
 }
 
 func (u *UserRepo) CreateUser(ctx context.Context, user *userpo.User) (*userpo.User, error) {
-	if err := mysql.GetDB(ctx, u.dbLabel()).Create(user).Error; err != nil {
+	if err := mysql.GetWriteDB(ctx, u.dbLabel()).Create(user).Error; err != nil {
 		logger.CtxErrorf(ctx, "CreateUser fail, user:[%+v], case:[%s]", user, err)
 		return nil, gerror.WriteDBError.Wrap(err)
 	}

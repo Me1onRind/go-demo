@@ -47,8 +47,10 @@ func AssociateEtcd(ctx context.Context, cli etcd.Client, key string, cfgPointer 
 func unmarshalBySuffix(ctx context.Context, key string, body []byte, cfgPointer any) error {
 	var err error
 	if strings.HasSuffix(key, ".json") {
+		logger.CtxInfof(ctx, "Use json unmarshal, key:[%s]", key)
 		err = jsoniter.Unmarshal(body, cfgPointer)
 	} else if strings.HasSuffix(key, ".yaml") || strings.HasSuffix(key, ".yml") {
+		logger.CtxInfof(ctx, "Use yaml unmarshal, key:[%s]", key)
 		err = yaml.Unmarshal(body, cfgPointer)
 	} else {
 		err = fmt.Errorf("Key:[%s] has not support suffix", key)
