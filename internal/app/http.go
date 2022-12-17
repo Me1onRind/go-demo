@@ -39,6 +39,7 @@ func (h *HttpServer) ReigsterRouter(router *gin.RouterGroup) *HttpServer {
 	router = router.Group("/api")
 	userGroup := router.Group("/user")
 	userGroup.GET("get_user_detail", middleware.JSON(h.UserUsecase.GetUserDetail, &userproto.GetUserDetailReq{}))
+	userGroup.POST("create_user", middleware.JSON(h.UserUsecase.CreateUser, &userproto.CreateUserReq{}))
 
 	unexpectGroup := router.Group("/unexpect")
 	unexpectGroup.GET("/panic", middleware.JSON(h.UnexpectUsecase.Panic, nil))

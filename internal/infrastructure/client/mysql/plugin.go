@@ -45,8 +45,15 @@ func afterMonitor(desc *dbDesc) func(*gorm.DB) {
 		duration := time.Since(startTime)
 
 		//m := statement.Dest.(*mysql.TestModel)
+		optr := ""
+		if len(statement.BuildClauses) > 0 {
+			optr = statement.BuildClauses[0]
+		}
 
 		logger.CtxInfof(ctx, "db:[%s],role:[%s],sql:[%s],args:[%v],cost:[%s]",
 			desc.dbLabel, desc.role, statement.SQL.String(), statement.Vars, duration)
+		if err := statement.Error; err != nil {
+			logger.CtxErrorf(ctx, "db:[%s],role:[%s],table:[%s],optr[%s],err:[%s]", desc.dbLabel, desc.role, statement.Table, optr, err)
+		}
 	}
 }

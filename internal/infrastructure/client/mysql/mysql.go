@@ -53,7 +53,7 @@ func GetReadDB(ctx context.Context, label string) *gorm.DB {
 	if tx != nil {
 		return tx
 	}
-	return dbs.getGormDBInfo(label).getReadDB()
+	return dbs.getGormDBInfo(label).getReadDB().WithContext(ctx)
 }
 
 func Transaction(ctx context.Context, label string, f TransactionHandler) (err error) {
@@ -111,7 +111,7 @@ func getTxOrWriteDB(ctx context.Context, label string) (*gorm.DB, bool) {
 	if tx != nil {
 		return tx, true
 	}
-	return dbs.getGormDBInfo(label).getWriteDB(), false
+	return dbs.getGormDBInfo(label).getWriteDB().WithContext(ctx), false
 }
 
 func getTx(ctx context.Context, label string) *gorm.DB {

@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"net/http"
 	"reflect"
@@ -15,7 +14,7 @@ import (
 )
 
 type JsonResponse struct {
-	Code    int32  `json:"code"`
+	Code    int    `json:"code"`
 	Message string `json:"message"`
 	Data    any    `json:"data"`
 }
@@ -65,8 +64,7 @@ func getResponse(data any, err error) *JsonResponse {
 		return response
 	}
 	response.Message = err.Error()
-	var expectErr *customErr.Error
-	if errors.As(err, &expectErr) {
+	if expectErr := customErr.ExtractError(err); expectErr != nil {
 		response.Code = expectErr.Code
 	} else {
 		response.Code = code.Unexpect

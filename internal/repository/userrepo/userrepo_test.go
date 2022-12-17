@@ -10,24 +10,11 @@ import (
 	"github.com/Me1onRind/go-demo/internal/global/gconfig"
 	"github.com/Me1onRind/go-demo/internal/infrastructure/client/mysql"
 	"github.com/Me1onRind/go-demo/internal/infrastructure/unittest"
-	"github.com/Me1onRind/go-demo/internal/model/po"
 	"github.com/Me1onRind/go-demo/internal/model/po/userpo"
 	sqlmockGormHelper "github.com/Me1onRind/sqlmock-gorm-helper"
 	mysqlDriver "github.com/go-sql-driver/mysql"
 	"github.com/stretchr/testify/assert"
 	"gorm.io/gorm"
-)
-
-var (
-	UserJ = &userpo.User{
-		BaseModel: po.BaseModel{
-			Id:         1,
-			CreateTime: 1680000000,
-			UpdateTime: 1680000000,
-		},
-		UserId: 166,
-		Name:   "J",
-	}
 )
 
 func TestMain(m *testing.M) {
@@ -59,14 +46,14 @@ func Test_GetUserByUserId(t *testing.T) {
 	mock := mysql.NewMysqlMock(userRepo.dbLabel())
 	defer assert.Empty(t, mock.ExpectationsWereMet())
 	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
+		mockProcess := mock.ExpectQuery("SELECT \\* FROM `user_tab` WHERE user_id=\\? LIMIT 1").
+			WithArgs(166)
 
+		t.Run(test.name, func(t *testing.T) {
 			if test.err != nil {
-				mock.ExpectQuery("SELECT \\* FROM `user_tab` WHERE user_id=\\? LIMIT 1").
-					WithArgs(166).WillReturnError(test.err)
+				mockProcess.WillReturnError(test.err)
 			} else {
-				mock.ExpectQuery("SELECT \\* FROM `user_tab` WHERE user_id=\\? LIMIT 1").
-					WithArgs(166).WillReturnRows(sqlmockGormHelper.ModelToRows(test.data))
+				mockProcess.WillReturnRows(sqlmockGormHelper.ModelToRows(test.data))
 			}
 
 			user, err := userRepo.GetUserByUserId(context.Background(), 166)
@@ -89,11 +76,11 @@ func Test_CreateUser(t *testing.T) {
 	}{
 		{
 			name: "success",
-			data: &userpo.User{Name: "test_name", UserId: 167},
+			data: &userpo.User{Name: "test_name", UserId: 167, Email: "test@google.com"},
 		},
 		{
 			name: "fail",
-			data: &userpo.User{Name: "test_name", UserId: 167},
+			data: &userpo.User{Name: "test_name", UserId: 167, Email: "test2@google.com"},
 			err:  &mysqlDriver.MySQLError{Number: 1062, Message: "Duplicate entry"},
 		},
 	}
@@ -104,13 +91,12 @@ func Test_CreateUser(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-
+			mockProcess := mock.ExpectExec(sqlmockGormHelper.InsertSql(userpo.User{}, `user_tab`)).
+				WithArgs(unittest.Now{}, unittest.Now{}, test.data.UserId, test.data.Email, test.data.Name)
 			if test.err != nil {
-				mock.ExpectExec(sqlmockGormHelper.InsertSql(userpo.User{}, `user_tab`)).
-					WithArgs(unittest.Now{}, unittest.Now{}, 167, "test_name").WillReturnError(test.err)
+				mockProcess.WillReturnError(test.err)
 			} else {
-				mock.ExpectExec(sqlmockGormHelper.InsertSql(userpo.User{}, `user_tab`)).
-					WithArgs(unittest.Now{}, unittest.Now{}, 167, "test_name").WillReturnResult(sqlmock.NewResult(100, 1))
+				mockProcess.WillReturnResult(sqlmock.NewResult(100, 1))
 			}
 
 			user, err := userRepo.CreateUser(context.Background(), test.data)
@@ -125,6 +111,51 @@ func Test_CreateUser(t *testing.T) {
 				}
 			}
 
+		})
+	}
+}
+
+func Test_GetUserByEmail(t *testing.T) {
+	tests := []struct {
+		name string
+		data *userpo.User
+		err  error
+	}{
+		{
+			name: "success",
+			data: UserJ,
+		},
+		{
+			name: "not found",
+			err:  gorm.ErrRecordNotFound,
+		},
+		{
+			name: "io error",
+			err:  io.EOF,
+		},
+	}
+
+	userRepo := NewUserRepo()
+	mock := mysql.NewMysqlMock(userRepo.dbLabel())
+	defer assert.Empty(t, mock.ExpectationsWereMet())
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			mockProcess := mock.ExpectQuery("SELECT \\* FROM `user_tab` WHERE email=\\? LIMIT 1").
+				WithArgs("test@google.com")
+			if test.err != nil {
+				mockProcess.WillReturnError(test.err)
+			} else {
+				mockProcess.WillReturnRows(sqlmockGormHelper.ModelToRows(test.data))
+			}
+
+			user, err := userRepo.GetUserByEmail(context.Background(), "test@google.com")
+			if test.err != nil {
+				assert.Empty(t, user)
+				assert.ErrorIs(t, err, test.err)
+			} else {
+				assert.Empty(t, err)
+				assert.Equal(t, true, assert.ObjectsAreEqual(user, test.data))
+			}
 		})
 	}
 }

@@ -1,17 +1,19 @@
 package code
 
 const (
-	Success int32 = 0
+	Success int = 0
 
-	Unexpect           = -10000000
-	JsonEncodeFail     = -10000001
-	JsonDecodeFail     = -10000002
-	ProtocolDecodeFail = -10000003
-	ReadDBFail         = -10000004
-	WriteDBFail        = -10000005
-	GenerateIdFail     = -10000006
+	Unexpect           = -100000
+	JsonEncodeFail     = -100001
+	JsonDecodeFail     = -100002
+	ProtocolDecodeFail = -100003
+	ReadDBFail         = -100004
+	WriteDBFail        = -100005
+	GenerateIdFail     = -100006
+
+	RecordExisted = -200000
 )
 
-func IsWarning(code int32) bool {
+func IsWarning(code int) bool {
 	return code > Success
 }

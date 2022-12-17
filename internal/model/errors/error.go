@@ -1,17 +1,18 @@
 package errors
 
 import (
+	"errors"
 	"fmt"
 )
 
 type Error struct {
-	Code int32
+	Code int
 
 	message string
 	cause   error
 }
 
-func NewError(code int32, message string) *Error {
+func NewError(code int, message string) *Error {
 	e := &Error{
 		Code:    code,
 		message: message,
@@ -35,4 +36,18 @@ func (e *Error) Wrap(err error) error {
 	newE := *e
 	newE.cause = err
 	return &newE
+}
+
+func (e *Error) Withf(msg string, a ...any) error {
+	newE := *e
+	newE.message = fmt.Sprintf("%s, %s", e.message, fmt.Sprintf(msg, a...))
+	return &newE
+}
+
+func ExtractError(err error) *Error {
+	var e *Error
+	if errors.As(err, &e) {
+		return e
+	}
+	return nil
 }

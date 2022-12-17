@@ -5,5 +5,6 @@ type GetUserDetailReq struct {
 }
 
 type CreateUserReq struct {
-	Name string `form:"user_id" binding:"required,min=1,max=16"`
+	Name  string `form:"name" binding:"required,min=1,max=16"`
+	Email string `form:"email" binding:"required,email"`
 }

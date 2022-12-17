@@ -21,6 +21,15 @@ func (u *UserRepo) dbLabel() string {
 	return gconfig.DynamicCfg.DefaultDB.GetLabel()
 }
 
+func (u *UserRepo) GetUserByEmail(ctx context.Context, email string) (*userpo.User, error) {
+	user := &userpo.User{}
+	if err := mysql.GetReadDB(ctx, u.dbLabel()).Take(user, "email=?", email).Error; err != nil {
+		logger.CtxErrorf(ctx, "GetUserByEmail fail, email:[%s], case:[%s]", email, err)
+		return nil, gerror.ReadDBError.Wrap(err)
+	}
+	return user, nil
+}
+
 func (u *UserRepo) GetUserByUserId(ctx context.Context, userId uint64) (*userpo.User, error) {
 	user := &userpo.User{}
 	if err := mysql.GetReadDB(ctx, u.dbLabel()).Take(user, "user_id=?", userId).Error; err != nil {

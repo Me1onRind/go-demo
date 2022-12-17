@@ -19,7 +19,7 @@ func Test_GetResponse(t *testing.T) {
 	for _, tt := range []struct {
 		Data       any
 		Err        error
-		ExpectCode int32
+		ExpectCode int
 		ExpectData any
 		Scenario   string
 	}{
@@ -46,7 +46,7 @@ func Test_GetResponse(t *testing.T) {
 			Scenario:   "unexpect",
 			Data:       map[string]any{"name": "werjhwe"},
 			Err:        fmt.Errorf("????????"),
-			ExpectCode: -10000000,
+			ExpectCode: -100000,
 		},
 	} {
 		t.Run(fmt.Sprintf("%s_response", tt.Scenario), func(t *testing.T) {
@@ -178,7 +178,7 @@ func Test_jsonGateWay(t *testing.T) {
 			handler: func(context.Context, any) (any, error) {
 				return map[string]any{"name": "f"}, nil
 			},
-			result: []byte(`{"code":-10000003,"message":"Decode request text fail, cause:[New protocol:[3] struct fail, cause it's type:[int] not support]","data":null}`),
+			result: []byte(`{"code":-100003,"message":"Decode request text fail, cause:[New protocol:[3] struct fail, cause it's type:[int] not support]","data":null}`),
 		},
 		{
 			name: "should bind fail",
@@ -188,14 +188,14 @@ func Test_jsonGateWay(t *testing.T) {
 			handler: func(context.Context, any) (any, error) {
 				return map[string]any{"name": "f"}, nil
 			},
-			result: []byte(`{"code":-10000003,"message":"Decode request text fail, cause:[Key: 'A' Error:Field validation for 'A' failed on the 'required' tag]","data":null}`),
+			result: []byte(`{"code":-100003,"message":"Decode request text fail, cause:[Key: 'A' Error:Field validation for 'A' failed on the 'required' tag]","data":null}`),
 		},
 		{
 			name: "json encode failed",
 			handler: func(context.Context, any) (any, error) {
 				return struct{ T func() }{T: func() {}}, nil
 			},
-			result: []byte(`{"code":-10000001,"message":"JSON Gateway encode response fail, err:[middleware.JsonResponse.Data: struct { T func() }.T:  Tfunc() is unsupported type]","data":null}`),
+			result: []byte(`{"code":-100001,"message":"JSON Gateway encode response fail, err:[middleware.JsonResponse.Data: struct { T func() }.T:  Tfunc() is unsupported type]","data":null}`),
 		},
 	}
 

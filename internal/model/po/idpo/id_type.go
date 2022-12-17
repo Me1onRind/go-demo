@@ -1,7 +1,7 @@
 //go:generate stringer -type=IdType
 package idpo
 
-type IdType int32
+type IdType uint32
 
 const (
 	UserIdType IdType = 1
