@@ -25,3 +25,19 @@ func Test_Errors_As(t *testing.T) {
 	assert.Equal(t, true, errors.As(err, &customErr))
 	assert.EqualValues(t, 200, customErr.Code)
 }
+
+func Test_Etract_Error(t *testing.T) {
+	assert.Empty(t, ExtractError(io.EOF))
+
+	e := NewError(200, "test")
+	err := e.Wrap(io.EOF)
+	extractE := ExtractError(err)
+	assert.Equal(t, extractE.Code, 200)
+}
+
+func Test_Code_Equal(t *testing.T) {
+	assert.Equal(t, false, CodeEqual(io.EOF, 200))
+	e := NewError(200, "test")
+	assert.Equal(t, true, CodeEqual(e, 200))
+	assert.Equal(t, false, CodeEqual(e, 100))
+}

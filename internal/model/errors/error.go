@@ -51,3 +51,10 @@ func ExtractError(err error) *Error {
 	}
 	return nil
 }
+
+func CodeEqual(err error, code int) bool {
+	if e := ExtractError(err); e != nil {
+		return e.Code == code
+	}
+	return false
+}
