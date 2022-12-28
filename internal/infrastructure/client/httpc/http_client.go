@@ -33,10 +33,10 @@ func (h *HTTPClient) SendJsonRequest(ctx context.Context, uri string, req, resp 
 	startTime := time.Now()
 	defer func() {
 		if err == nil {
-			logger.CtxInfof(ctx, "uri[%s],method:[POST],req:[%s],resp[%s],duration:[%s]",
+			logger.CtxInfof(ctx, "uri:[%s],method:[POST],req:[%s],resp:[%s],duration:[%s]",
 				uri, reqBody, rp.Body(), time.Since(startTime))
 		} else {
-			logger.CtxInfof(ctx, "uri[%s],method:[POST],req:[%s],resp[%s],duration:[%s],err:[%s]",
+			logger.CtxInfof(ctx, "uri:[%s],method:[POST],req:[%s],resp:[%s],duration:[%s],err:[%s]",
 				uri, reqBody, rp.Body(), time.Since(startTime), err)
 		}
 		fasthttp.ReleaseRequest(r)

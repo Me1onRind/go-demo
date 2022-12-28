@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 
+	"github.com/Me1onRind/go-demo/internal/infrastructure/tool/timehelper"
 	"github.com/sirupsen/logrus"
 )
 
@@ -15,6 +16,10 @@ var (
 
 func init() {
 	log.Out = os.Stdout
+	log.SetFormatter(&logrus.TextFormatter{
+		DisableQuote:    true,
+		TimestampFormat: timehelper.NormalFormat,
+	})
 	/*log.SetReportCaller(true)*/
 }
 
