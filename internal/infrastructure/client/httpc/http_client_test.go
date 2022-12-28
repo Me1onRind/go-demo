@@ -39,6 +39,6 @@ func Test_Send_Json_Request(t *testing.T) {
 		Message string `json:"message"`
 	}{}
 	ctx := context.Background()
-	err := client.SendJsonRequest(ctx, "http://localhost:15243/json", &req, &resp)
+	err := client.SendJsonRequest(ctx, "http://localhost:15243/json", &req, &resp, WithTimeout(time.Second))
 	assert.Empty(t, err)
 }

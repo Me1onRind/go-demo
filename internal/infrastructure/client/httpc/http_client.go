@@ -20,7 +20,7 @@ func NewHttpClient() *HTTPClient {
 	return h
 }
 
-func (h *HTTPClient) SendJsonRequest(ctx context.Context, uri string, req, resp any) error {
+func (h *HTTPClient) SendJsonRequest(ctx context.Context, uri string, req, resp any, opts ...Option) error {
 	var (
 		reqBody []byte
 		err     error
@@ -49,6 +49,10 @@ func (h *HTTPClient) SendJsonRequest(ctx context.Context, uri string, req, resp 
 			return err
 		}
 		r.SetBody(reqBody)
+	}
+
+	for _, opt := range opts {
+		opt(r)
 	}
 
 	err = h.fastClient.Do(r, rp)

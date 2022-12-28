@@ -1,6 +1,7 @@
 package mysql
 
 import (
+	"errors"
 	"time"
 
 	"github.com/Me1onRind/go-demo/internal/infrastructure/logger"
@@ -45,15 +46,17 @@ func afterMonitor(desc *dbDesc) func(*gorm.DB) {
 		duration := time.Since(startTime)
 
 		//m := statement.Dest.(*mysql.TestModel)
-		optr := ""
-		if len(statement.BuildClauses) > 0 {
-			optr = statement.BuildClauses[0]
-		}
+		//optr := ""
+		//if len(statement.BuildClauses) > 0 {
+		//optr = statement.BuildClauses[0]
+		//}
 
-		logger.CtxInfof(ctx, "db:[%s],role:[%s],sql:[%s],args:[%v],cost:[%s]",
-			desc.dbLabel, desc.role, statement.SQL.String(), statement.Vars, duration)
-		if err := statement.Error; err != nil {
-			logger.CtxErrorf(ctx, "db:[%s],role:[%s],table:[%s],optr[%s],err:[%s]", desc.dbLabel, desc.role, statement.Table, optr, err)
+		if err := statement.Error; err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+			logger.CtxErrorf(ctx, "db:[%s],role:[%s],sql:[%s],args:[%v],rows[%d],cost:[%s],err:[%s]",
+				desc.dbLabel, desc.role, statement.SQL.String(), statement.Vars, statement.RowsAffected, duration, err)
+		} else {
+			logger.CtxInfof(ctx, "db:[%s],role:[%s],sql:[%s],args:[%v],rows[%d],cost:[%s]",
+				desc.dbLabel, desc.role, statement.SQL.String(), statement.Vars, statement.RowsAffected, duration)
 		}
 	}
 }
