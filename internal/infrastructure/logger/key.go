@@ -1,5 +1,6 @@
 package logger
 
 const (
-	RequestIdKey = "request_id"
+	TraceIdKey = "trace_id"
+	SpanIdKey  = "span_id"
 )

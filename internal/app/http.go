@@ -29,7 +29,7 @@ func NewHttpServer() *HttpServer {
 func (h *HttpServer) RegisterMiddleware(r *gin.Engine) *HttpServer {
 	r.Use(
 		middleware.Recover(),
-		middleware.SetRequestId(),
+		middleware.Tracer(),
 		middleware.AccessLog(),
 	)
 	return h
@@ -51,11 +51,14 @@ func (h *HttpServer) Init() *HttpServer {
 		initialize.InitFileConfig("./conf.yml"),
 		initialize.InitEtcdClient(),
 		initialize.InitDynamicConfig(),
+
+		initialize.InitOpentracking("go-demo", "0.0.1"),
+
 		initialize.InitMysqlClient(),
 	}
 	ctx := context.Background()
 	ctx = logger.WithFields(ctx, logrus.Fields{
-		logger.RequestIdKey: "main-goruntine",
+		logger.TraceIdKey: "main-goruntine",
 	})
 
 	for _, f := range initFuncs {

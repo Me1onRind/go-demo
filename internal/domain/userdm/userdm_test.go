@@ -83,7 +83,7 @@ func Test_CreateUser(t *testing.T) {
 		assert.ErrorIs(t, err, io.EOF)
 	})
 
-	t.Run("exited_error", func(t *testing.T) {
+	t.Run("existed_error", func(t *testing.T) {
 		mock.ExpectQuery("SELECT \\* FROM `user_tab` WHERE email=\\? LIMIT 1").WithArgs("test@google.com").WillReturnRows(sqlmockGormHelper.ModelToRows(userrepo.UserJ))
 		user, err := userDomain.CreateUser(context.Background(), &userpo.User{
 			Name:  "test_j",
