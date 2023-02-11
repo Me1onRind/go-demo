@@ -21,11 +21,7 @@ func NewError(code int, message string) *Error {
 }
 
 func (e *Error) Error() string {
-	if e.cause == nil {
-		return e.message
-	}
-
-	return fmt.Sprintf("%s, cause:[%s]", e.message, e.cause.Error())
+	return e.message
 }
 
 func (e *Error) Unwrap() error {
@@ -33,9 +29,7 @@ func (e *Error) Unwrap() error {
 }
 
 func (e *Error) Wrap(err error) error {
-	newE := *e
-	newE.cause = err
-	return &newE
+	return fmt.Errorf("%w, cause:[%w]", e, err)
 }
 
 func (e *Error) Withf(msg string, a ...any) error {

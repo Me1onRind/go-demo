@@ -7,6 +7,7 @@ import (
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/Me1onRind/go-demo/internal/domain/iddm"
+	"github.com/Me1onRind/go-demo/internal/global/gerror"
 	"github.com/Me1onRind/go-demo/internal/infrastructure/client/mysql"
 	"github.com/Me1onRind/go-demo/internal/infrastructure/unittest"
 	"github.com/Me1onRind/go-demo/internal/model/configmd"
@@ -81,6 +82,7 @@ func Test_CreateUser(t *testing.T) {
 		})
 		assert.Empty(t, user)
 		assert.ErrorIs(t, err, io.EOF)
+		assert.ErrorIs(t, err, gerror.ReadDBError)
 	})
 
 	t.Run("existed_error", func(t *testing.T) {
