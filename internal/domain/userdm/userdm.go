@@ -42,5 +42,5 @@ func (u *UserDomain) CreateUser(ctx context.Context, user *userpo.User) (*userpo
 	}
 
 	user.UserId = userId
-	return u.UserRepo.CreateUser(ctx, user)
+	return u.UserRepo.Create(ctx, user)
 }

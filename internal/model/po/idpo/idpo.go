@@ -1,6 +1,9 @@
 package idpo
 
-import "github.com/Me1onRind/go-demo/internal/model/po"
+import (
+	"github.com/Me1onRind/go-demo/internal/global/gconfig"
+	"github.com/Me1onRind/go-demo/internal/model/po"
+)
 
 type IdCreator struct {
 	po.BaseModel
@@ -11,4 +14,8 @@ type IdCreator struct {
 
 func (i *IdCreator) TableName() string {
 	return "id_creator_tab"
+}
+
+func (i *IdCreator) DBLabel() string {
+	return gconfig.DynamicCfg.DefaultDB.GetLabel()
 }

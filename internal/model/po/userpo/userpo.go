@@ -1,6 +1,9 @@
 package userpo
 
-import "github.com/Me1onRind/go-demo/internal/model/po"
+import (
+	"github.com/Me1onRind/go-demo/internal/global/gconfig"
+	"github.com/Me1onRind/go-demo/internal/model/po"
+)
 
 type User struct {
 	po.BaseModel
@@ -11,4 +14,8 @@ type User struct {
 
 func (u *User) TableName() string {
 	return "user_tab"
+}
+
+func (u *User) DBLabel() string {
+	return gconfig.DynamicCfg.DefaultDB.GetLabel()
 }

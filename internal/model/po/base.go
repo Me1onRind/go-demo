@@ -5,3 +5,7 @@ type BaseModel struct {
 	CreateTime uint32 `gorm:"column:create_time;autoCreateTime" json:"create_time"`
 	UpdateTime uint32 `gorm:"column:update_time;autoUpdateTime" json:"update_time"`
 }
+
+func (b *BaseModel) GetId() uint64 {
+	return b.Id
+}
