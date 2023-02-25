@@ -62,7 +62,7 @@ func Test_GetRecord(t *testing.T) {
 					WillReturnError(test.err)
 			}
 
-			record, err := idRepo.GetIdRecord(context.Background(), idpo.UserIdType)
+			record, err := idRepo.GetRecord(context.Background(), WithIdType(idpo.UserIdType))
 			if test.err == nil {
 				assert.Empty(t, err)
 				assert.Equal(t, true, assert.ObjectsAreEqual(record, test.data))

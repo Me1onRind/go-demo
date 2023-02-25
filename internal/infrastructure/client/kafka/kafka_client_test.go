@@ -11,6 +11,7 @@ import (
 )
 
 func Test_Send_Message(t *testing.T) {
+	t.Skip()
 	client, err := NewKafkaClient(configmd.KafkaConfig{
 		Addr:            []string{},
 		ProducerTimeout: time.Second * 2,

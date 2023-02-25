@@ -26,7 +26,7 @@ func NewUserDomain() *UserDomain {
 
 func (u *UserDomain) CreateUser(ctx context.Context, user *userpo.User) (*userpo.User, error) {
 
-	_, err := u.UserRepo.GetUserByEmail(ctx, user.Email)
+	_, err := u.UserRepo.GetUser(ctx, userrepo.WithEmail(user.Email))
 	if err == nil {
 		return nil, gerror.RecordExistedError.Withf("email:[%s]", user.Email)
 	}
@@ -42,5 +42,5 @@ func (u *UserDomain) CreateUser(ctx context.Context, user *userpo.User) (*userpo
 	}
 
 	user.UserId = userId
-	return u.UserRepo.Create(ctx, user)
+	return u.UserRepo.CreateUser(ctx, user)
 }

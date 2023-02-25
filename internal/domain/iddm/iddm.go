@@ -47,8 +47,9 @@ type IdDomain interface {
 func NewIdDomain() IdDomain {
 	once.Do(func() {
 		instance = &idDomain{
-			pools: map[idpo.IdType]*idPool{},
-			Mutex: &sync.RWMutex{},
+			pools:  map[idpo.IdType]*idPool{},
+			Mutex:  &sync.RWMutex{},
+			IdRepo: idrepo.NewIdRepo(),
 		}
 	})
 	return instance
@@ -86,7 +87,7 @@ func (i *idDomain) GetId(ctx context.Context, idType idpo.IdType, maxTry int) (u
 	}
 
 	for j := 0; j < maxTry; j++ {
-		record, err := i.IdRepo.GetIdRecord(ctx, idType)
+		record, err := i.IdRepo.GetRecord(ctx, idrepo.WithIdType(idType))
 		if err != nil {
 			return 0, err
 		}

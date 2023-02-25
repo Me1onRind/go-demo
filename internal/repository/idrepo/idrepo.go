@@ -8,23 +8,27 @@ import (
 	"github.com/Me1onRind/go-demo/internal/infrastructure/logger"
 	"github.com/Me1onRind/go-demo/internal/model/po/idpo"
 	respository "github.com/Me1onRind/go-demo/internal/repository"
+	"gorm.io/gorm"
 )
 
 type IdRepo struct {
-	*respository.BaseRepo[*idpo.IdCreator]
+	baseRepo *respository.BaseRepo[*idpo.IdCreator]
 }
 
 func NewIdRepo() *IdRepo {
-	return &IdRepo{}
+	return &IdRepo{
+		baseRepo: respository.NewBaseRepo[*idpo.IdCreator](),
+	}
 }
 
-func (i *IdRepo) GetIdRecord(ctx context.Context, idType idpo.IdType) (*idpo.IdCreator, error) {
-	var record idpo.IdCreator
-	if err := mysql.GetReadDB(ctx, record.DBLabel()).Take(&record, "id_type=?", idType).Error; err != nil {
-		logger.CtxErrorf(ctx, "GetIdRecord fail, id_type:[%d], case:[%s]", idType, err)
-		return nil, gerror.ReadDBError.Wrap(err)
+func (i *IdRepo) GetRecord(ctx context.Context, opts ...respository.Option) (*idpo.IdCreator, error) {
+	return i.baseRepo.Take(ctx, opts...)
+}
+
+func WithIdType(idType idpo.IdType) respository.Option {
+	return func(db *gorm.DB) *gorm.DB {
+		return db.Where("id_type=?", idType)
 	}
-	return &record, nil
 }
 
 func (i *IdRepo) UpdateOffset(ctx context.Context, idType idpo.IdType, oldOffset uint64, step uint32) (int64, error) {

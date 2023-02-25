@@ -23,7 +23,7 @@ func NewUserUsecase() *UserUsecase {
 
 func (u *UserUsecase) GetUserDetail(ctx context.Context, raw any) (any, error) {
 	request := raw.(*userproto.GetUserDetailReq)
-	return u.UserRepo.GetUserByUserId(ctx, request.UserId)
+	return u.UserRepo.GetUser(ctx, userrepo.WithUserId(request.UserId), userrepo.WithUserId(request.UserId))
 }
 
 func (u *UserUsecase) CreateUser(ctx context.Context, raw any) (any, error) {

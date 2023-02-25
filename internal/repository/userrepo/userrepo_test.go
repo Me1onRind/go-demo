@@ -56,7 +56,7 @@ func Test_GetUserByUserId(t *testing.T) {
 				mockProcess.WillReturnRows(sqlmockGormHelper.ModelToRows(test.data))
 			}
 
-			user, err := userRepo.GetUserByUserId(context.Background(), 166)
+			user, err := userRepo.GetUser(context.Background(), WithUserId(166))
 			if test.err != nil {
 				assert.Empty(t, user)
 				assert.ErrorIs(t, err, test.err)
@@ -99,7 +99,7 @@ func Test_CreateUser(t *testing.T) {
 				mockProcess.WillReturnResult(sqlmock.NewResult(100, 1))
 			}
 
-			user, err := userRepo.Create(context.Background(), test.data)
+			user, err := userRepo.CreateUser(context.Background(), test.data)
 			if test.err != nil {
 				assert.Empty(t, user)
 				assert.ErrorIs(t, err, test.err)
@@ -148,7 +148,7 @@ func Test_GetUserByEmail(t *testing.T) {
 				mockProcess.WillReturnRows(sqlmockGormHelper.ModelToRows(test.data))
 			}
 
-			user, err := userRepo.GetUserByEmail(context.Background(), "test@google.com")
+			user, err := userRepo.GetUser(context.Background(), WithEmail("test@google.com"))
 			if test.err != nil {
 				assert.Empty(t, user)
 				assert.ErrorIs(t, err, test.err)

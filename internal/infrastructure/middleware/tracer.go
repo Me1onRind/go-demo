@@ -7,7 +7,6 @@ import (
 	"github.com/Me1onRind/go-demo/internal/infrastructure/tracer"
 	"github.com/gin-gonic/gin"
 	opentracing "github.com/opentracing/opentracing-go"
-	"github.com/sirupsen/logrus"
 	"go.elastic.co/apm/module/apmhttp"
 )
 
@@ -20,10 +19,8 @@ func Tracer() gin.HandlerFunc {
 		traceId, _ := traceIdAndSpanIdFromSpan(span.Context())
 		setGinExtractContext(c, logger.WithFields(
 			mustGetGinExtractContext(c),
-			logrus.Fields{
-				logger.TraceIdKey: traceId,
-				//logger.SpanIdKey:  spanId,
-			}))
+			logger.TraceIdKey, traceId,
+		))
 		setGinExtractContext(c, tracer.WithSpan(mustGetGinExtractContext(c), span))
 
 		c.Next()

@@ -3,40 +3,52 @@ package logger
 import (
 	"context"
 	"os"
+	"time"
 
 	"github.com/Me1onRind/go-demo/internal/infrastructure/tool/timehelper"
-	"github.com/sirupsen/logrus"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
 type loggerKey struct{}
 
 var (
-	log = logrus.New()
+	globalLogger *zap.SugaredLogger
 )
 
 func init() {
-	log.Out = os.Stdout
-	log.SetFormatter(&logrus.TextFormatter{
-		DisableQuote:    true,
-		TimestampFormat: timehelper.NormalFormat,
+	encoder := zapcore.NewConsoleEncoder(zapcore.EncoderConfig{
+		MessageKey:       "msg",
+		LevelKey:         "level",
+		TimeKey:          "ts",
+		CallerKey:        "file",
+		EncodeCaller:     zapcore.ShortCallerEncoder,
+		ConsoleSeparator: "|",
+		EncodeTime: func(t time.Time, enc zapcore.PrimitiveArrayEncoder) {
+			enc.AppendString(t.Format(timehelper.NormalFormat))
+		},
+		EncodeDuration: func(d time.Duration, enc zapcore.PrimitiveArrayEncoder) {
+			enc.AppendInt64(int64(d) / 1000000)
+		},
 	})
-	/*log.SetReportCaller(true)*/
+	core := zapcore.NewTee(zapcore.NewCore(encoder, zapcore.AddSync(os.Stdout), zap.DebugLevel))
+	globalLogger = zap.New(core, zap.AddCaller(), zap.AddCallerSkip(1),
+		zap.Hooks(func(e zapcore.Entry) error {
+			return nil
+		})).
+		Sugar()
 }
 
-func WithContext(ctx context.Context) context.Context {
-	return context.WithValue(ctx, loggerKey{}, log.WithContext(ctx))
-}
-
-func WithFields(ctx context.Context, fields logrus.Fields) context.Context {
-	l := getLoggerFromCtx(ctx).WithFields(fields)
+func WithFields(ctx context.Context, args ...any) context.Context {
+	l := getLoggerFromCtx(ctx).With(args...)
 	return context.WithValue(ctx, loggerKey{}, l)
 }
 
-func getLoggerFromCtx(ctx context.Context) *logrus.Entry {
-	if l, ok := ctx.Value(loggerKey{}).(*logrus.Entry); ok {
+func getLoggerFromCtx(ctx context.Context) *zap.SugaredLogger {
+	if l, ok := ctx.Value(loggerKey{}).(*zap.SugaredLogger); ok {
 		return l
 	}
-	return log.WithContext(ctx)
+	return globalLogger
 }
 
 func CtxDebugf(ctx context.Context, format string, a ...interface{}) {
@@ -44,7 +56,7 @@ func CtxDebugf(ctx context.Context, format string, a ...interface{}) {
 }
 
 func Debugf(format string, a ...interface{}) {
-	log.Debugf(format, a...)
+	globalLogger.Debugf(format, a...)
 }
 
 func CtxInfof(ctx context.Context, format string, a ...interface{}) {
@@ -52,7 +64,7 @@ func CtxInfof(ctx context.Context, format string, a ...interface{}) {
 }
 
 func Infof(format string, a ...interface{}) {
-	log.Infof(format, a...)
+	globalLogger.Infof(format, a...)
 }
 
 func CtxWarnf(ctx context.Context, format string, a ...interface{}) {
@@ -60,7 +72,7 @@ func CtxWarnf(ctx context.Context, format string, a ...interface{}) {
 }
 
 func Warnf(format string, a ...interface{}) {
-	log.Warnf(format, a...)
+	globalLogger.Warnf(format, a...)
 }
 
 func CtxErrorf(ctx context.Context, format string, a ...interface{}) {
@@ -68,7 +80,7 @@ func CtxErrorf(ctx context.Context, format string, a ...interface{}) {
 }
 
 func Errorf(format string, a ...interface{}) {
-	log.Errorf(format, a...)
+	globalLogger.Errorf(format, a...)
 }
 
 func CtxFatalf(ctx context.Context, format string, a ...interface{}) {
@@ -76,5 +88,5 @@ func CtxFatalf(ctx context.Context, format string, a ...interface{}) {
 }
 
 func Fatalf(ctx context.Context, format string, a ...interface{}) {
-	log.Fatalf(format, a...)
+	globalLogger.Fatalf(format, a...)
 }

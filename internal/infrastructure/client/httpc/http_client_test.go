@@ -18,7 +18,7 @@ func TestMain(m *testing.M) {
 		for k, v := range request.Header {
 			fmt.Printf("http header:%s, value:%s\n", k, v)
 		}
-		writer.Write([]byte(`{"code":1000,"message":"msg"}`))
+		_, _ = writer.Write([]byte(`{"code":1000,"message":"msg"}`))
 		//io.WriteString(writer, `{"code":1000,"message":"msg"}`)
 	})
 

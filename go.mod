@@ -13,13 +13,13 @@ require (
 	github.com/golang/mock v1.6.0
 	github.com/json-iterator/go v1.1.12
 	github.com/opentracing/opentracing-go v1.2.0
-	github.com/sirupsen/logrus v1.9.0
 	github.com/stretchr/testify v1.8.1
 	github.com/valyala/fasthttp v1.43.0
 	go.elastic.co/apm v1.15.0
 	go.elastic.co/apm/module/apmhttp v1.15.0
 	go.elastic.co/apm/module/apmot v1.15.0
 	go.etcd.io/etcd/client/v3 v3.5.5
+	go.uber.org/zap v1.17.0
 	gopkg.in/yaml.v2 v2.4.0
 	gorm.io/driver/mysql v1.4.4
 	gorm.io/gorm v1.24.1
@@ -80,7 +80,6 @@ require (
 	go.etcd.io/etcd/client/pkg/v3 v3.5.5 // indirect
 	go.uber.org/atomic v1.7.0 // indirect
 	go.uber.org/multierr v1.6.0 // indirect
-	go.uber.org/zap v1.17.0 // indirect
 	golang.org/x/crypto v0.0.0-20220722155217-630584e8d5aa // indirect
 	golang.org/x/lint v0.0.0-20210508222113-6edffad5e616 // indirect
 	golang.org/x/mod v0.6.0-dev.0.20220419223038-86c51ed26bb4 // indirect
