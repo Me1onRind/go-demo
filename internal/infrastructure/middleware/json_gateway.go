@@ -19,28 +19,27 @@ type JsonResponse struct {
 	Data    any    `json:"data"`
 }
 
-type HTTPHandler func(c context.Context, raw any) (data any, err error)
+type HTTPHandler[T any] func(c context.Context, request *T) (data any, err error)
 
-func JSON(handler HTTPHandler, protocol any) gin.HandlerFunc {
+func JSON[T any](handler HTTPHandler[T]) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		c.Data(http.StatusOK, "application/json; charset=utf-8", jsonGateWay(c, handler, protocol))
+		c.Data(http.StatusOK, "application/json; charset=utf-8", jsonGateWay(c, handler))
 		c.Next()
 	}
 }
 
-func jsonGateWay(c *gin.Context, handler HTTPHandler, protocol any) []byte {
+func jsonGateWay[T any](c *gin.Context, handler HTTPHandler[T]) []byte {
 	ctx := mustGetGinExtractContext(c)
 
 	var response *JsonResponse
-	raw, err := initProtocol(c, protocol)
-
-	if err != nil {
+	var request T
+	if err := c.ShouldBind(&request); err != nil {
 		response = &JsonResponse{
 			Code:    code.ProtocolDecodeFail,
 			Message: fmt.Sprintf("Decode request text fail, cause:[%s]", err),
 		}
 	} else {
-		data, err := handler(ctx, raw)
+		data, err := handler(ctx, &request)
 		response = getResponse(data, err)
 	}
 

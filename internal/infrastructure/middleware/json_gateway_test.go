@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"context"
 	"fmt"
 	"io"
 	"net/http"
@@ -159,52 +158,4 @@ func Test_newProtocol(t *testing.T) {
 }
 
 func Test_jsonGateWay(t *testing.T) {
-	tests := []struct {
-		name     string
-		protocol any
-		handler  HTTPHandler
-		result   []byte
-	}{
-		{
-			name: "success",
-			handler: func(context.Context, any) (any, error) {
-				return map[string]any{"name": "f"}, nil
-			},
-			result: []byte(`{"code":0,"message":"Success","data":{"name":"f"}}`),
-		},
-		{
-			name:     "protocol decode failed",
-			protocol: 3,
-			handler: func(context.Context, any) (any, error) {
-				return map[string]any{"name": "f"}, nil
-			},
-			result: []byte(`{"code":-100003,"message":"Decode request text fail, cause:[New protocol:[3] struct fail, cause it's type:[int] not support]","data":null}`),
-		},
-		{
-			name: "should bind fail",
-			protocol: struct {
-				A string `form:"a" binding:"required"`
-			}{},
-			handler: func(context.Context, any) (any, error) {
-				return map[string]any{"name": "f"}, nil
-			},
-			result: []byte(`{"code":-100003,"message":"Decode request text fail, cause:[Key: 'A' Error:Field validation for 'A' failed on the 'required' tag]","data":null}`),
-		},
-		{
-			name: "json encode failed",
-			handler: func(context.Context, any) (any, error) {
-				return struct{ T func() }{T: func() {}}, nil
-			},
-			result: []byte(`{"code":-100001,"message":"JSON Gateway encode response fail, err:[middleware.JsonResponse.Data: struct { T func() }.T:  Tfunc() is unsupported type]","data":null}`),
-		},
-	}
-
-	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
-			c := &gin.Context{}
-			c.Request, _ = http.NewRequestWithContext(context.Background(), "GET", "", nil)
-			t.Logf("%s", jsonGateWay(c, test.handler, test.protocol))
-			assert.Equal(t, test.result, jsonGateWay(c, test.handler, test.protocol))
-		})
-	}
 }

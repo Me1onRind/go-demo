@@ -40,7 +40,7 @@ func (r *BaseRepo[T]) Find(ctx context.Context, opts ...Option) ([]T, error) {
 	var model T
 	db := mysql.GetReadDB(ctx, model.DBLabel())
 	for _, opt := range opts {
-		opt(db)
+		db = opt(db)
 	}
 	if err := db.Find(&result).Error; err != nil {
 		logger.CtxErrorf(ctx, "Find DB fail, db:[%s], table:[%s], case:[%s]",

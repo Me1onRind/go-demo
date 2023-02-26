@@ -6,6 +6,7 @@ import (
 	"github.com/Me1onRind/go-demo/internal/global/gclient"
 	"github.com/Me1onRind/go-demo/internal/global/gconfig"
 	"github.com/Me1onRind/go-demo/internal/infrastructure/client/etcd"
+	"github.com/Me1onRind/go-demo/internal/infrastructure/client/kafka"
 	"github.com/Me1onRind/go-demo/internal/infrastructure/client/mysql"
 	clientv3 "go.etcd.io/etcd/client/v3"
 )
@@ -27,6 +28,21 @@ func InitMysqlClient() InitHandler {
 		err := mysql.RegisterMysqlCluster(&gconfig.DynamicCfg.DefaultDB)
 		if err != nil {
 			return err
+		}
+		return nil
+	}
+}
+
+func InitKafkaClient() InitHandler {
+	return func(ctx context.Context) error {
+		for _, cfg := range gconfig.DynamicCfg.KafkaConfigs {
+			client, err := kafka.NewKafkaClient(cfg)
+			if err != nil {
+				return err
+			}
+			if err := gclient.RegisterKafkaClient(cfg.Name, client); err != nil {
+				return err
+			}
 		}
 		return nil
 	}

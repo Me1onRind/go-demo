@@ -22,7 +22,9 @@ func TestMain(m *testing.M) {
 		//io.WriteString(writer, `{"code":1000,"message":"msg"}`)
 	})
 
-	go http.ListenAndServe(host, nil)
+	go func() {
+		_ = http.ListenAndServe(host, nil)
+	}()
 	time.Sleep(time.Millisecond * 20)
 	os.Exit(m.Run())
 }
