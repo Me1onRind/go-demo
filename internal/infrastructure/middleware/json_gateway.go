@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"reflect"
 
 	"github.com/Me1onRind/go-demo/internal/infrastructure/logger"
 	customErr "github.com/Me1onRind/go-demo/internal/model/errors"
@@ -73,31 +72,4 @@ func getResponse(data any, err error) *JsonResponse {
 		response.Data = data
 	}
 	return response
-}
-
-func initProtocol(c *gin.Context, protocol any) (any, error) {
-	if protocol == nil {
-		return nil, nil
-	}
-	entity, err := newProtocol(protocol)
-	if err != nil {
-		return nil, err
-	}
-	if err := c.ShouldBind(entity); err != nil {
-		return nil, err
-	}
-
-	return entity, nil
-}
-
-func newProtocol(protocol any) (any, error) {
-	valueType := reflect.TypeOf(protocol)
-	switch valueType.Kind() {
-	case reflect.Ptr:
-		return reflect.New(valueType.Elem()).Interface(), nil
-	case reflect.Struct:
-		return reflect.New(valueType).Interface(), nil
-	default:
-		return nil, fmt.Errorf("New protocol:[%+v] struct fail, cause it's type:[%s] not support", protocol, valueType.Kind())
-	}
 }

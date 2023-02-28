@@ -1,7 +1,8 @@
 package code
 
 const (
-	Success int = 0
+	Success   int = 0
+	Duplicate int = 1
 
 	Unexpect           = -100000
 	JsonEncodeFail     = -100001

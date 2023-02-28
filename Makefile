@@ -20,5 +20,9 @@ test_cover:
 	@skip_io=1 go test ./... -coverprofile=/tmp/go_test.out
 	go tool cover -html=/tmp/go_test.out -o=/root/share/coverage.html
 
+test_cover_mac:
+	@skip_io=1 go test ./... -coverprofile=/tmp/go_test.out
+	go tool cover -html=/tmp/go_test.out
+
 generate:
 	go generate ./...
