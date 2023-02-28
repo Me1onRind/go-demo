@@ -31,3 +31,7 @@ func RegisterKafkaClient(name string, client *kafka.KafkaClient) error {
 	kafkaClients[name] = client
 	return nil
 }
+
+func CleanKafkaClient(name string) {
+	delete(kafkaClients, name)
+}

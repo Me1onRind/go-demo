@@ -6,7 +6,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Me1onRind/go-demo/internal/infrastructure/unittest"
 	"github.com/stretchr/testify/assert"
 	clientv3 "go.etcd.io/etcd/client/v3"
 )
@@ -16,7 +15,7 @@ var (
 )
 
 func TestMain(m *testing.M) {
-	unittest.SkipCauseIO()
+	os.Exit(0)
 	var err error
 	localEtcdAddress := "127.0.0.1:2379"
 

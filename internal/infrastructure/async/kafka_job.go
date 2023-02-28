@@ -13,9 +13,8 @@ import (
 )
 
 type KafkaJob[T any] struct {
-	JobName  string
-	Protocol *T
-	Handler  func(context.Context, *T) error
+	JobName string
+	Handler func(context.Context, *T) error
 }
 
 type KafkaJobEntity struct {
@@ -23,10 +22,9 @@ type KafkaJobEntity struct {
 	Content any    `json:"content"`
 }
 
-func NewKafkaJob[T any](name, kafkaName, topic string, protocol T, handler func(*context.Context, *T) error) Job {
+func NewKafkaJob[T any](name string, handler func(*context.Context, *T) error) *KafkaJob[T] {
 	return &KafkaJob[T]{
-		JobName:  name,
-		Protocol: &protocol,
+		JobName: name,
 	}
 }
 
@@ -57,7 +55,7 @@ func (j *KafkaJob[T]) Send(ctx context.Context, protocol any, opts ...Option) er
 	}
 
 	jobCfg := gconfig.DynamicCfg.GetKafkaJobConfig(j.JobName)
-	logger.CtxInfof(ctx, "Job:[%s] send to kafka:[%s], topic:[%s]", j.Name, jobCfg.KafkaName, jobCfg.Topic)
+	logger.CtxInfof(ctx, "Job:[%s] send to kafka:[%s], topic:[%s]", j.Name(), jobCfg.KafkaName, jobCfg.Topic)
 	client, err := gclient.GetKafkaClient(ctx, jobCfg.KafkaName)
 	if err != nil {
 		return err
