@@ -15,7 +15,7 @@ func Test_KafkaJob_Send(t *testing.T) {
 	type Msg struct {
 		Field string
 	}
-	unittest.SetKafkaJobConfig("demo", "kafka_demo", "topci_demo")
+	unittest.SetKafkaJobConfig("demo", "kafka_demo", "topic_demo")
 
 	t.Run("sendSuccess", func(t *testing.T) {
 		kafkaClient := unittest.GetMockKafkaClient(t, "kafka_demo")
