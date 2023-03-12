@@ -33,7 +33,7 @@ func (h *HttpServer) RegisterMiddleware(r *gin.Engine) *HttpServer {
 	return h
 }
 
-func (h *HttpServer) ReigsterRouter(router *gin.RouterGroup) *HttpServer {
+func (h *HttpServer) RegisterRouter(router *gin.RouterGroup) *HttpServer {
 	router = router.Group("/api")
 	userGroup := router.Group("/user")
 	userGroup.GET("get_user_detail", middleware.JSON(h.UserUsecase.GetUserDetail))
