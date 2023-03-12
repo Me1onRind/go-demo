@@ -45,18 +45,16 @@ func afterMonitor(desc *dbDesc) func(*gorm.DB) {
 		startTime := st.(time.Time)
 		duration := time.Since(startTime)
 
-		//m := statement.Dest.(*mysql.TestModel)
-		//optr := ""
-		//if len(statement.BuildClauses) > 0 {
-		//optr = statement.BuildClauses[0]
-		//}
-
+		cmd := ""
+		if len(statement.BuildClauses) > 0 {
+			cmd = statement.BuildClauses[0]
+		}
 		if err := statement.Error; err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-			logger.CtxErrorf(ctx, "db:[%s],role:[%s],sql:[%s],args:[%v],rows[%d],cost:[%s],err:[%s]",
-				desc.dbLabel, desc.role, statement.SQL.String(), statement.Vars, statement.RowsAffected, duration, err)
+			logger.CtxErrorf(ctx, "db:[%s],role:[%s],table[%s],cmd:[%s],duration:[%s],err:[%s]",
+				desc.dbLabel, desc.role, db.Statement.Table, cmd, duration, err)
 		} else {
-			logger.CtxInfof(ctx, "db:[%s],role:[%s],sql:[%s],args:[%v],rows[%d],cost:[%s]",
-				desc.dbLabel, desc.role, statement.SQL.String(), statement.Vars, statement.RowsAffected, duration)
+			logger.CtxInfof(ctx, "db:[%s],role:[%s],table[%s],cmd:[%s],duration:[%s]",
+				desc.dbLabel, desc.role, db.Statement.Table, cmd, duration)
 		}
 	}
 }

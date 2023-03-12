@@ -41,3 +41,8 @@ func Test_Code_Equal(t *testing.T) {
 	assert.Equal(t, true, CodeEqual(e, 200))
 	assert.Equal(t, false, CodeEqual(e, 100))
 }
+
+func Test_Withf(t *testing.T) {
+	e := NewError(200, "test")
+	assert.Equal(t, "test, cause:[test,f]", e.Withf("%s,%s", "test", "f").Error())
+}

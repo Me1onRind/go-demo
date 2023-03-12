@@ -8,7 +8,6 @@ import (
 	"github.com/Me1onRind/go-demo/internal/model/configmd"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	gormLogger "gorm.io/gorm/logger"
 )
 
 var (
@@ -17,8 +16,9 @@ var (
 
 type TransactionHandler func(context.Context) error
 type ctxTransactionKey string
+type Option func(*gorm.DB) *gorm.DB
 
-func RegisterMysqlCluster(cfg *configmd.DBCluster) error {
+func NewMysqlCluster(cfg *configmd.DBCluster) error {
 	master, err := newGormDBByDialector(mysql.Open(cfg.Master.DSN), &dbDesc{
 		role:    "master",
 		dbLabel: cfg.Label,
@@ -43,17 +43,17 @@ func RegisterMysqlCluster(cfg *configmd.DBCluster) error {
 	return nil
 }
 
-func GetWriteDB(ctx context.Context, label string) *gorm.DB {
+func GetWriteDB(ctx context.Context, label string, opts ...Option) *gorm.DB {
 	db, _ := getTxOrWriteDB(ctx, label)
-	return db
+	return decoration(db)
 }
 
-func GetReadDB(ctx context.Context, label string) *gorm.DB {
+func GetReadDB(ctx context.Context, label string, opts ...Option) *gorm.DB {
 	tx := getTx(ctx, label)
 	if tx != nil {
-		return tx
+		return decoration(tx, opts...)
 	}
-	return dbs.getGormDBInfo(label).getReadDB().WithContext(ctx)
+	return decoration(dbs.getGormDBInfo(label).getReadDB(), opts...).WithContext(ctx)
 }
 
 func Transaction(ctx context.Context, label string, f TransactionHandler) (err error) {
@@ -97,7 +97,7 @@ func NewMysqlMock(label string) sqlmock.Sqlmock {
 func newGormDBByDialector(source gorm.Dialector, desc *dbDesc) (*gorm.DB, error) {
 	db, err := gorm.Open(source, &gorm.Config{
 		SkipDefaultTransaction: true,
-		Logger:                 gormLogger.Default.LogMode(gormLogger.Silent),
+		Logger:                 logger.NewMysqlLogger(),
 	})
 	if err != nil {
 		return nil, err
@@ -122,32 +122,9 @@ func getTx(ctx context.Context, label string) *gorm.DB {
 	return nil
 }
 
-//func GetWriteDB(ctx context.Context, dbLabel string) *gorm.DB {
-//db, _ := getDB(ctx, dbLabel)
-//return db
-//}
-
-//func getDB(ctx context.Context, dbLabel string) (*gorm.DB, bool) {
-//tx := ctx.Value(ctxTransactionKey(dbLabel))
-//if tx != nil {
-//return tx.(*gorm.DB), true
-//}
-
-//db := dbs[dbLabel]
-//if db == nil {
-//panic(fmt.Sprintf("DB label:[%s] not exist", dbLabel))
-//}
-//return db.WithContext(ctx), false
-//}
-
-//func setDBLabel(db *gorm.DB, label string, checkDuplicate bool) error {
-//if len(label) == 0 {
-//return fmt.Errorf("DB label is empty")
-//}
-
-//if _, ok := dbs[label]; checkDuplicate && ok {
-//return fmt.Errorf("DB label:[%s] is existed", label)
-//}
-//dbs[label] = db
-//return nil
-//}
+func decoration(db *gorm.DB, opts ...Option) *gorm.DB {
+	for _, opt := range opts {
+		db = opt(db)
+	}
+	return db
+}

@@ -1,4 +1,4 @@
-package respository
+package mysql
 
 import (
 	"context"
@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
-	"github.com/Me1onRind/go-demo/internal/infrastructure/client/mysql"
 	"github.com/Me1onRind/go-demo/internal/infrastructure/unittest"
 	"github.com/Me1onRind/go-demo/internal/model/po"
 	sqlmockGormHelper "github.com/Me1onRind/sqlmock-gorm-helper"
@@ -14,20 +13,16 @@ import (
 	"gorm.io/gorm"
 )
 
-type TestModel struct {
+type TestModel2 struct {
 	po.BaseModel
 	Field1 string `gorm:"column:field1"`
 }
 
-func (t *TestModel) TableName() string {
+func (t *TestModel2) TableName() string {
 	return "test_tab"
 }
 
-func (t *TestModel) DBLabel() string {
-	return "mock"
-}
-
-var testModel *TestModel = &TestModel{
+var testModel2 *TestModel2 = &TestModel2{
 	BaseModel: po.BaseModel{
 		Id:         123456,
 		CreateTime: 1670000000,
@@ -39,24 +34,23 @@ var testModel *TestModel = &TestModel{
 func Test_Create(t *testing.T) {
 	tests := []struct {
 		name string
-		data *TestModel
+		data *TestModel2
 		err  error
 	}{
 		{
 			name: "success",
-			data: &TestModel{Field1: "mck"},
+			data: &TestModel2{Field1: "mck"},
 		},
 		{
 			name: "fail",
-			data: &TestModel{Field1: "mck2"},
+			data: &TestModel2{Field1: "mck2"},
 			err:  io.EOF,
 		},
 	}
-	mock := mysql.NewMysqlMock((&TestModel{}).DBLabel())
+	mock := NewMysqlMock("mock")
 	defer assert.Empty(t, mock.ExpectationsWereMet())
-	repo := NewBaseRepo[*TestModel]()
 	for _, test := range tests {
-		mockProcess := mock.ExpectExec(sqlmockGormHelper.InsertSql(&TestModel{}, `test_tab`)).
+		mockProcess := mock.ExpectExec(sqlmockGormHelper.InsertSql(&TestModel2{}, `test_tab`)).
 			WithArgs(unittest.Now{}, unittest.Now{}, test.data.Field1)
 		t.Run(test.name, func(t *testing.T) {
 			if test.err != nil {
@@ -65,7 +59,7 @@ func Test_Create(t *testing.T) {
 				mockProcess.WillReturnResult(sqlmock.NewResult(100, 1))
 			}
 
-			value, err := repo.Create(context.Background(), test.data)
+			value, err := Create(context.Background(), "mock", test.data)
 			if test.err != nil {
 				assert.Empty(t, value)
 				assert.ErrorIs(t, err, test.err)
@@ -83,12 +77,12 @@ func Test_Create(t *testing.T) {
 func Test_Take(t *testing.T) {
 	tests := []struct {
 		name string
-		data *TestModel
+		data *TestModel2
 		err  error
 	}{
 		{
 			name: "success",
-			data: testModel,
+			data: testModel2,
 		},
 		{
 			name: "notFound",
@@ -99,9 +93,8 @@ func Test_Take(t *testing.T) {
 			err:  io.EOF,
 		},
 	}
-	mock := mysql.NewMysqlMock((&TestModel{}).DBLabel())
+	mock := NewMysqlMock("mock")
 	defer assert.Empty(t, mock.ExpectationsWereMet())
-	repo := NewBaseRepo[*TestModel]()
 	for _, test := range tests {
 		mockProcess := mock.ExpectQuery("SELECT \\* FROM `test_tab` WHERE id=\\? LIMIT 1").
 			WithArgs(123456)
@@ -112,7 +105,7 @@ func Test_Take(t *testing.T) {
 				mockProcess.WillReturnRows(sqlmockGormHelper.ModelToRows(test.data))
 			}
 
-			value, err := repo.Take(context.Background(), func(db *gorm.DB) *gorm.DB {
+			value, err := Take[TestModel2](context.Background(), "mock", func(db *gorm.DB) *gorm.DB {
 				return db.Where("id=?", 123456)
 			})
 			if test.err != nil {
@@ -129,12 +122,12 @@ func Test_Take(t *testing.T) {
 func Test_Find(t *testing.T) {
 	tests := []struct {
 		name string
-		data []*TestModel
+		data []*TestModel2
 		err  error
 	}{
 		{
 			name: "success",
-			data: []*TestModel{testModel},
+			data: []*TestModel2{testModel2},
 		},
 		{
 			name: "notFound",
@@ -142,16 +135,15 @@ func Test_Find(t *testing.T) {
 		},
 		{
 			name: "empty",
-			data: []*TestModel{},
+			data: []*TestModel2{},
 		},
 		{
 			name: "ioError",
 			err:  io.EOF,
 		},
 	}
-	mock := mysql.NewMysqlMock((&TestModel{}).DBLabel())
+	mock := NewMysqlMock("mock")
 	defer assert.Empty(t, mock.ExpectationsWereMet())
-	repo := NewBaseRepo[*TestModel]()
 	for _, test := range tests {
 		mockProcess := mock.ExpectQuery("SELECT \\* FROM `test_tab` WHERE field1=\\?").
 			WithArgs("mock")
@@ -162,7 +154,7 @@ func Test_Find(t *testing.T) {
 				mockProcess.WillReturnRows(sqlmockGormHelper.ModelToRows(test.data))
 			}
 
-			value, err := repo.Find(context.Background(), func(db *gorm.DB) *gorm.DB {
+			value, err := Find[TestModel2](context.Background(), "mock", func(db *gorm.DB) *gorm.DB {
 				return db.Where("field1=?", "mock")
 			})
 			if test.err != nil {

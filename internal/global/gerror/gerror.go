@@ -11,6 +11,7 @@ var (
 	ReadDBError     = errors.NewError(code.ReadDBFail, "Read DB Fail")
 	WriteDBError    = errors.NewError(code.WriteDBFail, "Write DB Fail")
 	GenerateIdError = errors.NewError(code.GenerateIdFail, "Generate Id Fail")
+	SendJobError    = errors.NewError(code.SendJobFail, "Send Job Fail")
 
 	RecordExistedError = errors.NewError(code.RecordExisted, "Record Is Existed")
 )

@@ -25,7 +25,7 @@ func InitEtcdClient() InitHandler {
 
 func InitMysqlClient() InitHandler {
 	return func(ctx context.Context) error {
-		err := mysql.RegisterMysqlCluster(&gconfig.DynamicCfg.DefaultDB)
+		err := mysql.NewMysqlCluster(&gconfig.DynamicCfg.DefaultDB)
 		if err != nil {
 			return err
 		}

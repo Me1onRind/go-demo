@@ -11,6 +11,7 @@ const (
 	ReadDBFail         = -100004
 	WriteDBFail        = -100005
 	GenerateIdFail     = -100006
+	SendJobFail        = -100007
 
 	RecordExisted = -200000
 )

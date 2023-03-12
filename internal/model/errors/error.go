@@ -33,9 +33,11 @@ func (e *Error) Wrap(err error) error {
 }
 
 func (e *Error) Withf(msg string, a ...any) error {
-	newE := *e
-	newE.message = fmt.Sprintf("%s, %s", e.message, fmt.Sprintf(msg, a...))
-	return &newE
+	return e.With(fmt.Sprintf(msg, a...))
+}
+
+func (e *Error) With(msg string) error {
+	return fmt.Errorf("%w, cause:[%s]", e, msg)
 }
 
 func ExtractError(err error) *Error {

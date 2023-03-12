@@ -7,6 +7,7 @@ import (
 
 	"github.com/Me1onRind/go-demo/internal/global/gclient"
 	"github.com/Me1onRind/go-demo/internal/global/gconfig"
+	"github.com/Me1onRind/go-demo/internal/global/gerror"
 	"github.com/Me1onRind/go-demo/internal/infrastructure/client/kafka"
 	"github.com/Me1onRind/go-demo/internal/infrastructure/logger"
 	jsoniter "github.com/json-iterator/go"
@@ -36,7 +37,7 @@ func (j *KafkaJob[T]) Send(ctx context.Context, protocol any, opts ...Option) er
 	if _, ok := protocol.(*T); !ok {
 		errMsg := fmt.Sprintf("Job:[%s] send fail, protocol:[%+v] is not match register protocol", j.JobName, protocol)
 		logger.CtxErrorf(ctx, errMsg)
-		return errors.New(errMsg)
+		return gerror.SendJobError.With(errMsg)
 	}
 
 	sendParam := &SendParam{}

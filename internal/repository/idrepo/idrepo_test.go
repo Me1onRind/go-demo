@@ -50,7 +50,7 @@ func Test_GetRecord(t *testing.T) {
 	}
 
 	idRepo := NewIdRepo()
-	mock := mysql.NewMysqlMock((&idpo.IdCreator{}).DBLabel())
+	mock := mysql.NewMysqlMock(idRepo.DBLabel())
 	defer assert.Empty(t, mock.ExpectationsWereMet())
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
@@ -95,7 +95,7 @@ func Test_UpdateRecord(t *testing.T) {
 	}
 
 	idRepo := NewIdRepo()
-	mock := mysql.NewMysqlMock((&idpo.IdCreator{}).DBLabel())
+	mock := mysql.NewMysqlMock(idRepo.DBLabel())
 	defer assert.Empty(t, mock.ExpectationsWereMet())
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
