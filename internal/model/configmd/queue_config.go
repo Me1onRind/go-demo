@@ -1,14 +1,18 @@
 package configmd
 
-import "time"
+import (
+	"fmt"
+	"time"
+)
 
-type KafkaConfig struct {
-	Name            string        `yaml:"name"`
+type KafkaJobConfig struct {
+	KafkaName       string        `yaml:"kafka_name"`
+	Topic           string        `yaml:"topic"`
 	Addr            []string      `yaml:"addr"`
+	ConsumerGroup   string        `yaml:"consumer_group"`
 	ProducerTimeout time.Duration `yaml:"producer_timeout"`
 }
 
-type KafkaJobConfig struct {
-	KafkaName string `yaml:"kafka_name"`
-	Topic     string `yaml:"topic"`
+func (k *KafkaJobConfig) UniqueKey() string {
+	return fmt.Sprintf("%s_%s", k.KafkaName, k.Topic)
 }

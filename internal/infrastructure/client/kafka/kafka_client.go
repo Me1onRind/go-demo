@@ -16,7 +16,7 @@ type KafkaClient struct {
 	MockProducer *mocks.SyncProducer
 }
 
-func NewKafkaClient(cfg configmd.KafkaConfig) (*KafkaClient, error) {
+func NewKafkaClient(cfg configmd.KafkaJobConfig) (*KafkaClient, error) {
 	kafkaCfg := getBaseProducerConfig()
 	kafkaCfg.Producer.Timeout = cfg.ProducerTimeout
 	p, err := sarama.NewSyncProducer(cfg.Addr, kafkaCfg)
@@ -82,5 +82,16 @@ func PartitionKey(key string) Option {
 			return
 		}
 		msg.Key = sarama.StringEncoder(key)
+	}
+}
+
+func WithHeaers(headers map[string]string) Option {
+	return func(msg *sarama.ProducerMessage) {
+		for key, value := range headers {
+			msg.Headers = append(msg.Headers, sarama.RecordHeader{
+				Key:   []byte(key),
+				Value: []byte(value),
+			})
+		}
 	}
 }

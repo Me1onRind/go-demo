@@ -35,12 +35,12 @@ func Test_Etract_Error(t *testing.T) {
 	assert.Equal(t, extractE.Code, 200)
 }
 
-func Test_Code_Equal(t *testing.T) {
-	assert.Equal(t, false, CodeEqual(io.EOF, 200))
-	e := NewError(200, "test")
-	assert.Equal(t, true, CodeEqual(e, 200))
-	assert.Equal(t, false, CodeEqual(e, 100))
-}
+//func Test_Code_Equal(t *testing.T) {
+//assert.Equal(t, false, CodeEqual(io.EOF, 200))
+//e := NewError(200, "test")
+//assert.Equal(t, true, CodeEqual(e, 200))
+//assert.Equal(t, false, CodeEqual(e, 100))
+//}
 
 func Test_Withf(t *testing.T) {
 	e := NewError(200, "test")

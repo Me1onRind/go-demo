@@ -27,7 +27,7 @@ func NewHttpServer() *HttpServer {
 func (h *HttpServer) RegisterMiddleware(r *gin.Engine) *HttpServer {
 	r.Use(
 		middleware.Recover(),
-		middleware.Tracer(),
+		middleware.GinTracer(),
 		middleware.AccessLog(),
 	)
 	return h
@@ -58,6 +58,7 @@ func (h *HttpServer) Init() *HttpServer {
 	for _, f := range initFuncs {
 		if err := f(ctx); err != nil {
 			logger.CtxFatalf(ctx, "initialize fail, err:[%s]", err)
+			panic(err)
 		}
 	}
 	return h

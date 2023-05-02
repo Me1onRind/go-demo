@@ -30,7 +30,7 @@ func Test_Tracer(t *testing.T) {
 		tr, _ := apm.NewTracer("test", "0.0.1")
 		opentracing.SetGlobalTracer(apmot.New(apmot.WithTracer(tr)))
 		c, r := gin.CreateTestContext(httptest.NewRecorder())
-		r.Use(Tracer())
+		r.Use(GinTracer())
 		r.POST("/tracer", func(ctx *gin.Context) {
 		})
 		c.Request, _ = http.NewRequest("POST", "/tracer", nil)
@@ -43,7 +43,7 @@ func Test_Tracer(t *testing.T) {
 		tr, _ := apm.NewTracer("test", "0.0.1")
 		opentracing.SetGlobalTracer(apmot.New(apmot.WithTracer(tr)))
 		c, r := gin.CreateTestContext(httptest.NewRecorder())
-		r.Use(Tracer())
+		r.Use(GinTracer())
 		r.POST("/tracer", func(ctx *gin.Context) {
 		})
 		c.Request, _ = http.NewRequest("POST", "/tracer", nil)
@@ -57,7 +57,7 @@ func Test_Tracer(t *testing.T) {
 		tr, _ := apm.NewTracer("test", "0.0.1")
 		opentracing.SetGlobalTracer(apmot.New(apmot.WithTracer(tr)))
 		c, r := gin.CreateTestContext(httptest.NewRecorder())
-		r.Use(Tracer())
+		r.Use(GinTracer())
 		r.POST("/tracer", func(ctx *gin.Context) {
 		})
 		c.Request, _ = http.NewRequest("POST", "/tracer", nil)
@@ -71,7 +71,7 @@ func Test_Tracer(t *testing.T) {
 		tr, _ := apm.NewTracer("test", "0.0.1")
 		opentracing.SetGlobalTracer(apmot.New(apmot.WithTracer(tr)))
 		c, r := gin.CreateTestContext(httptest.NewRecorder())
-		r.Use(Tracer())
+		r.Use(GinTracer())
 		r.POST("/tracer", func(ctx *gin.Context) {
 		})
 		c.Request, _ = http.NewRequest("POST", "/tracer", nil)

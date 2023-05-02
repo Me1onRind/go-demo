@@ -35,12 +35,12 @@ func InitMysqlClient() InitHandler {
 
 func InitKafkaClient() InitHandler {
 	return func(ctx context.Context) error {
-		for _, cfg := range gconfig.DynamicCfg.KafkaConfigs {
+		for name, cfg := range gconfig.DynamicCfg.KafkaJobConfigs {
 			client, err := kafka.NewKafkaClient(cfg)
 			if err != nil {
 				return err
 			}
-			if err := gclient.RegisterKafkaClient(cfg.Name, client); err != nil {
+			if err := gclient.RegisterKafkaClient(name, client); err != nil {
 				return err
 			}
 		}

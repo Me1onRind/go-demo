@@ -2,7 +2,6 @@ package async
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
 	"github.com/Me1onRind/go-demo/internal/global/gclient"
@@ -13,9 +12,12 @@ import (
 	jsoniter "github.com/json-iterator/go"
 )
 
+const (
+	KafkaJobNameKey = "job_name"
+)
+
 type KafkaJob[T any] struct {
-	JobName string
-	Handler func(context.Context, *T) error
+	jobBase[T]
 }
 
 type KafkaJobEntity struct {
@@ -23,9 +25,12 @@ type KafkaJobEntity struct {
 	Content any    `json:"content"`
 }
 
-func NewKafkaJob[T any](name string, handler func(*context.Context, *T) error) *KafkaJob[T] {
+func NewKafkaJob[T any](name string, handler func(context.Context, *T) error) Job {
 	return &KafkaJob[T]{
-		JobName: name,
+		jobBase: jobBase[T]{
+			JobName: name,
+			Handler: handler,
+		},
 	}
 }
 
@@ -45,35 +50,28 @@ func (j *KafkaJob[T]) Send(ctx context.Context, protocol any, opts ...Option) er
 		opt(sendParam)
 	}
 
-	jobEntity := &KafkaJobEntity{
-		JobName: j.JobName,
-		Content: protocol,
-	}
-
-	body, err := jsoniter.Marshal(jobEntity)
+	body, err := jsoniter.Marshal(protocol)
 	if err != nil {
 		return err
 	}
 
-	jobCfg := gconfig.DynamicCfg.GetKafkaJobConfig(j.JobName)
+	jobCfg := gconfig.DynamicCfg.KafkaJobConfigs[j.JobName]
 	logger.CtxInfof(ctx, "Job:[%s] send to kafka:[%s], topic:[%s]", j.Name(), jobCfg.KafkaName, jobCfg.Topic)
 	client, err := gclient.GetKafkaClient(ctx, jobCfg.KafkaName)
 	if err != nil {
 		return err
 	}
-	if _, _, err := client.SendMessage(ctx, jobCfg.Topic, body, kafka.PartitionKey(sendParam.Key)); err != nil {
+	if _, _, err := client.SendMessage(ctx, jobCfg.Topic, body,
+		kafka.PartitionKey(sendParam.Key),
+		kafka.WithHeaers(map[string]string{
+			KafkaJobNameKey: j.Name(),
+		}),
+	); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (j *KafkaJob[T]) Handle(ctx context.Context, protocol any) error {
-	p, ok := protocol.(*T)
-	if !ok {
-		errMsg := fmt.Sprintf("Job:[%s] handle fail, protocol:[%+v] is not match register protocol", j.JobName, protocol)
-		logger.CtxErrorf(ctx, errMsg)
-		return errors.New(errMsg)
-	}
-
-	return j.Handler(ctx, p)
+func (j *KafkaJob[T]) BackendType() JobBackendType {
+	return KafkaBackendJob
 }
