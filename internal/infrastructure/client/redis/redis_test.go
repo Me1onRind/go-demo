@@ -24,7 +24,7 @@ func Test_Base(t *testing.T) {
 	cfg := configmd.RedisConfig{
 		Addr: redisServer.Addr(),
 	}
-	client, err := NewRedisClient(&cfg)
+	client, err := newRedisPool(&cfg)
 	if !assert.Empty(t, err) {
 		return
 	}

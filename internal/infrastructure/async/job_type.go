@@ -5,4 +5,5 @@ type JobBackendType int
 
 const (
 	KafkaBackendJob JobBackendType = 1
+	RedisBackendJob JobBackendType = 2
 )

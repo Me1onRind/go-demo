@@ -2,14 +2,11 @@ package async
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/Me1onRind/go-demo/internal/global/gclient"
 	"github.com/Me1onRind/go-demo/internal/global/gconfig"
-	"github.com/Me1onRind/go-demo/internal/global/gerror"
 	"github.com/Me1onRind/go-demo/internal/infrastructure/client/kafka"
 	"github.com/Me1onRind/go-demo/internal/infrastructure/logger"
-	jsoniter "github.com/json-iterator/go"
 )
 
 const (
@@ -20,12 +17,7 @@ type KafkaJob[T any] struct {
 	jobBase[T]
 }
 
-type KafkaJobEntity struct {
-	JobName string `json:"job_name"`
-	Content any    `json:"content"`
-}
-
-func NewKafkaJob[T any](name string, handler func(context.Context, *T) error) Job {
+func NewKafkaJob[T any](name string, handler func(context.Context, *T) error) JobWorker {
 	return &KafkaJob[T]{
 		jobBase: jobBase[T]{
 			JobName: name,
@@ -34,34 +26,14 @@ func NewKafkaJob[T any](name string, handler func(context.Context, *T) error) Jo
 	}
 }
 
-func (j *KafkaJob[T]) Name() string {
-	return j.JobName
-}
-
-func (j *KafkaJob[T]) Send(ctx context.Context, protocol any, opts ...Option) error {
-	if _, ok := protocol.(*T); !ok {
-		errMsg := fmt.Sprintf("Job:[%s] send fail, protocol:[%+v] is not match register protocol", j.JobName, protocol)
-		logger.CtxErrorf(ctx, errMsg)
-		return gerror.SendJobError.With(errMsg)
-	}
-
-	sendParam := &SendParam{}
-	for _, opt := range opts {
-		opt(sendParam)
-	}
-
-	body, err := jsoniter.Marshal(protocol)
-	if err != nil {
-		return err
-	}
-
+func (j *KafkaJob[T]) Send(ctx context.Context, msgEntity []byte, sendParam *SendParam) error {
 	jobCfg := gconfig.DynamicCfg.KafkaJobConfigs[j.JobName]
-	logger.CtxInfof(ctx, "Job:[%s] send to kafka:[%s], topic:[%s]", j.Name(), jobCfg.KafkaName, jobCfg.Topic)
-	client, err := gclient.GetKafkaClient(ctx, jobCfg.KafkaName)
+	logger.CtxInfof(ctx, "Job %s send to kafka, kafka_name=%s, topic=%s", j.Name(), jobCfg.KafkaName, jobCfg.Topic)
+	client, err := gclient.GetKafkaClient(jobCfg.KafkaName)
 	if err != nil {
 		return err
 	}
-	if _, _, err := client.SendMessage(ctx, jobCfg.Topic, body,
+	if _, _, err := client.SendMessage(ctx, jobCfg.Topic, msgEntity,
 		kafka.PartitionKey(sendParam.Key),
 		kafka.WithHeaers(map[string]string{
 			KafkaJobNameKey: j.Name(),

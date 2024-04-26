@@ -60,12 +60,12 @@ func (k *KafkaClient) SendMessage(ctx context.Context, topic string, body []byte
 
 	_, _, err := k.getProducer().SendMessage(msg)
 	if err != nil {
-		logger.CtxErrorf(ctx, "Sender kafka message fail, topic:[%s], msg:[%s], cost:[%s], err:[%s]",
+		logger.CtxErrorf(ctx, "Sender kafka message fail, topic=%s, msg=%s, cost=%s, err=%s",
 			msg.Topic, msg.Value, time.Since(startTime), err.Error())
 		return 0, 0, err
 	}
-	logger.CtxInfof(ctx, "Sender kafka message success, topic:[%s], metadata:[%v], headers:[%v], key[%s], msg:[%s], partition_id:[%d], offset:[%d], cost:[%s]",
-		msg.Topic, msg.Metadata, msg.Headers, msg.Key, msg.Value, msg.Partition, msg.Offset, time.Since(startTime))
+	logger.CtxInfof(ctx, "Sender kafka message success, topic=%s, headers=%s, key=%s, msg=%s, partition_id=%d, offset=%d, cost=%s",
+		msg.Topic, msg.Headers, msg.Key, msg.Value, msg.Partition, msg.Offset, time.Since(startTime))
 	return msg.Partition, msg.Offset, nil
 }
 

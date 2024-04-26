@@ -5,8 +5,10 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"reflect"
 	"time"
 
+	"github.com/Me1onRind/go-demo/internal/global/gerror"
 	"github.com/Me1onRind/go-demo/internal/infrastructure/goroutine"
 	"github.com/Me1onRind/go-demo/internal/infrastructure/logger"
 	"github.com/Me1onRind/go-demo/internal/infrastructure/middleware"
@@ -19,16 +21,21 @@ var (
 )
 
 type JobManager struct {
-	jobs map[string]Job // key: jobName
+	jobs map[string]JobWorker // key: jobName
+}
+
+type MsgEntity struct {
+	JobName string `json:"job_name"`
+	Content any    `json:"content"`
 }
 
 func NewJobManager() *JobManager {
 	return &JobManager{
-		jobs: make(map[string]Job, 0),
+		jobs: make(map[string]JobWorker, 0),
 	}
 }
 
-func (j *JobManager) RegisterJob(job Job) error {
+func (j *JobManager) RegisterJob(job JobWorker) error {
 	if _, ok := j.jobs[job.Name()]; ok {
 		return fmt.Errorf("Register job failed, duplicate name:[%s]", job.Name())
 	}
@@ -36,7 +43,7 @@ func (j *JobManager) RegisterJob(job Job) error {
 	return nil
 }
 
-func (j *JobManager) GetJob(name string) (Job, error) {
+func (j *JobManager) GetJob(name string) (JobWorker, error) {
 	value, ok := j.jobs[name]
 	if !ok {
 		return nil, fmt.Errorf("%w, name:[%s]", ErrJobNotFound, name)
@@ -44,15 +51,47 @@ func (j *JobManager) GetJob(name string) (Job, error) {
 	return value, nil
 }
 
-func (j *JobManager) GetAllJobs() map[string]Job {
+func (j *JobManager) Send(ctx context.Context, name string, protocol any, opts ...Option) error {
+	job, err := j.GetJob(name)
+	if err != nil {
+		return err
+	}
+	if err := job.CheckSendProtocolType(ctx, protocol); err != nil {
+		return err
+	}
+	sendParam := &SendParam{}
+	for _, opt := range opts {
+		opt(sendParam)
+	}
+	msgEntity := &MsgEntity{
+		JobName: job.Name(),
+		Content: protocol,
+	}
+
+	body, err := jsoniter.Marshal(msgEntity)
+	if err != nil {
+		return err
+	}
+
+	if err := job.Send(ctx, body, sendParam); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (j *JobManager) GetAllJobs() map[string]JobWorker {
 	return j.jobs
 }
 
-type Job interface {
-	Send(ctx context.Context, protocol any, opts ...Option) error
-	Name() string
+type JobWorker interface {
+	Send(ctx context.Context, msgEntity []byte, param *SendParam) error
 	BackendType() JobBackendType
 	Handle(ctx context.Context, body []byte, metadata http.Header) error
+
+	// public method
+	Name() string
+	CheckSendProtocolType(context.Context, any) error
 }
 
 type SendParam struct {
@@ -70,6 +109,19 @@ func WithKey(key string) Option {
 type jobBase[T any] struct {
 	JobName string
 	Handler func(context.Context, *T) error
+}
+
+func (j *jobBase[T]) Name() string {
+	return j.JobName
+}
+
+func (j *jobBase[T]) CheckSendProtocolType(ctx context.Context, protocol any) error {
+	if _, ok := protocol.(*T); !ok {
+		errMsg := fmt.Sprintf("Job %s send fail, protocol %s is not match register protocol %s", j.JobName, reflect.TypeOf(protocol), reflect.TypeOf(new(T)))
+		logger.CtxErrorf(ctx, errMsg)
+		return gerror.SendJobError.With(errMsg)
+	}
+	return nil
 }
 
 func (j *jobBase[T]) Handle(ctx context.Context, body []byte, metadata http.Header) error {

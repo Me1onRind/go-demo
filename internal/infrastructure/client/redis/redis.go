@@ -3,6 +3,7 @@ package redis
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/Me1onRind/go-demo/internal/infrastructure/logger"
@@ -10,7 +11,28 @@ import (
 	"github.com/go-redis/redis/v8"
 )
 
-func NewRedisClient(cfg *configmd.RedisConfig) (*redis.Client, error) {
+var (
+	redisClients = map[string]*redis.Client{}
+)
+
+func GetRedisClient(label string) *redis.Client {
+	client := redisClients[label]
+	if client == nil {
+		panic(fmt.Sprintf("Redis label %s not exist", label))
+	}
+	return client
+}
+
+func NewRedisClient(cfg *configmd.RedisConfig) error {
+	client, err := newRedisPool(cfg)
+	if err != nil {
+		return err
+	}
+	redisClients[cfg.Label] = client
+	return nil
+}
+
+func newRedisPool(cfg *configmd.RedisConfig) (*redis.Client, error) {
 	opt := redis.Options{
 		Addr:     cfg.Addr,
 		Username: cfg.Username,

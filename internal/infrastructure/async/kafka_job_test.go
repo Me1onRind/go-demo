@@ -28,15 +28,19 @@ func Test_KafkaJob_Send(t *testing.T) {
 			return nil
 		})
 
-		job := NewKafkaJob[Msg]("demo", nil)
-		err := job.Send(context.Background(), &Msg{Field: "field"}, WithKey("key"))
+		jobWorker := NewKafkaJob[Msg]("demo", nil)
+		jm := NewJobManager()
+		jm.RegisterJob(jobWorker)
+		err := jm.Send(context.Background(), "demo", &Msg{Field: "field"}, WithKey("key"))
 		assert.Empty(t, err)
 	})
 
 	t.Run("sendWrongProtocol", func(t *testing.T) {
-		type WrongMsg struct{}
-		job := NewKafkaJob[Msg]("demo", nil)
-		err := job.Send(context.Background(), &WrongMsg{}, WithKey("key"))
+		type WrongMsg struct{ Key string }
+		jobWorker := NewKafkaJob[Msg]("demo", nil)
+		jm := NewJobManager()
+		jm.RegisterJob(jobWorker)
+		err := jm.Send(context.Background(), "demo", &WrongMsg{Key: "wrong"}, WithKey("key"))
 		assert.ErrorIs(t, err, gerror.SendJobError)
 	})
 }

@@ -1,7 +1,6 @@
 package configmd
 
 import (
-	"fmt"
 	"time"
 )
 
@@ -13,6 +12,7 @@ type KafkaJobConfig struct {
 	ProducerTimeout time.Duration `yaml:"producer_timeout"`
 }
 
-func (k *KafkaJobConfig) UniqueKey() string {
-	return fmt.Sprintf("%s_%s", k.KafkaName, k.Topic)
+type RedisJobConfig struct {
+	RedisLabel string `yaml:"redis_label"`
+	QueueKey   string `yaml:"queue_key"`
 }

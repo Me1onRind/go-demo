@@ -29,7 +29,7 @@ func (g *gormSet) register(dbLabel string, info *gormDBInfo) {
 func (g *gormSet) getGormDBInfo(dbLabel string) *gormDBInfo {
 	info := g.infos[dbLabel]
 	if info == nil {
-		panic(fmt.Sprintf("DB label:[%s] not exist", dbLabel))
+		panic(fmt.Sprintf("DB label %s not exist", dbLabel))
 	}
 	return info
 }

@@ -43,7 +43,7 @@ func Test_GetUserByUserId(t *testing.T) {
 	}
 
 	userRepo := NewUserRepo()
-	mock := mysql.NewMysqlMock((&userpo.User{}).DBLabel())
+	mock := mysql.NewMysqlMock(userRepo.DBLabel())
 	defer assert.Empty(t, mock.ExpectationsWereMet())
 	for _, test := range tests {
 		mockProcess := mock.ExpectQuery("SELECT \\* FROM `user_tab` WHERE user_id=\\? LIMIT 1").
@@ -86,7 +86,7 @@ func Test_CreateUser(t *testing.T) {
 	}
 
 	userRepo := NewUserRepo()
-	mock := mysql.NewMysqlMock((&userpo.User{}).DBLabel())
+	mock := mysql.NewMysqlMock(userRepo.DBLabel())
 	defer assert.Empty(t, mock.ExpectationsWereMet())
 
 	for _, test := range tests {
@@ -136,7 +136,7 @@ func Test_GetUserByEmail(t *testing.T) {
 	}
 
 	userRepo := NewUserRepo()
-	mock := mysql.NewMysqlMock((&userpo.User{}).DBLabel())
+	mock := mysql.NewMysqlMock(userRepo.DBLabel())
 	defer assert.Empty(t, mock.ExpectationsWereMet())
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {

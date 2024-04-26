@@ -49,6 +49,8 @@ type DBConfig struct {
 }
 
 type RedisConfig struct {
+	Label string
+
 	Addr         string `yaml:"addr"`
 	Username     string `yaml:"username"`
 	Password     string `yaml:"password"`
