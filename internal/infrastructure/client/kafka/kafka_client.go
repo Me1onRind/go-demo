@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/Me1onRind/go-demo/internal/global/gerror"
 	"github.com/Me1onRind/go-demo/internal/infrastructure/logger"
 	"github.com/Me1onRind/go-demo/internal/model/configmd"
 	"github.com/Shopify/sarama"
@@ -45,13 +46,14 @@ func getBaseProducerConfig() *sarama.Config {
 
 type Option func(*sarama.ProducerMessage)
 
-func (k *KafkaClient) SendMessage(ctx context.Context, topic string, body []byte, opts ...Option) (int32, int64, error) {
+func (k *KafkaClient) SendMessage(ctx context.Context, topic, partitionKey string, body []byte, opts ...Option) (int32, int64, error) {
 	startTime := time.Now()
 
 	msg := &sarama.ProducerMessage{
 		Topic:     topic,
 		Value:     sarama.ByteEncoder(body),
 		Timestamp: time.Now(),
+		Key:       sarama.StringEncoder(partitionKey),
 	}
 
 	for _, opt := range opts {
@@ -62,7 +64,7 @@ func (k *KafkaClient) SendMessage(ctx context.Context, topic string, body []byte
 	if err != nil {
 		logger.CtxErrorf(ctx, "Sender kafka message fail, topic=%s, msg=%s, cost=%s, err=%s",
 			msg.Topic, msg.Value, time.Since(startTime), err.Error())
-		return 0, 0, err
+		return 0, 0, gerror.SendKafkaError.Wrap(err)
 	}
 	logger.CtxInfof(ctx, "Sender kafka message success, topic=%s, headers=%s, key=%s, msg=%s, partition_id=%d, offset=%d, cost=%s",
 		msg.Topic, msg.Headers, msg.Key, msg.Value, msg.Partition, msg.Offset, time.Since(startTime))
@@ -74,15 +76,6 @@ func (k *KafkaClient) getProducer() sarama.SyncProducer {
 		return k.producer
 	}
 	return k.MockProducer
-}
-
-func PartitionKey(key string) Option {
-	return func(msg *sarama.ProducerMessage) {
-		if len(key) == 0 {
-			return
-		}
-		msg.Key = sarama.StringEncoder(key)
-	}
 }
 
 func WithHeaers(headers map[string]string) Option {

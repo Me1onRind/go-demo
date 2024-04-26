@@ -41,6 +41,6 @@ func Test_KafkaJob_Send(t *testing.T) {
 		jm := NewJobManager()
 		jm.RegisterJob(jobWorker)
 		err := jm.Send(context.Background(), "demo", &WrongMsg{Key: "wrong"}, WithKey("key"))
-		assert.ErrorIs(t, err, gerror.SendJobError)
+		assert.ErrorIs(t, err, gerror.InvalidJobProtocolError)
 	})
 }

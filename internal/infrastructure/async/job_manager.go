@@ -119,7 +119,7 @@ func (j *jobBase[T]) CheckSendProtocolType(ctx context.Context, protocol any) er
 	if _, ok := protocol.(*T); !ok {
 		errMsg := fmt.Sprintf("Job %s send fail, protocol %s is not match register protocol %s", j.JobName, reflect.TypeOf(protocol), reflect.TypeOf(new(T)))
 		logger.CtxErrorf(ctx, errMsg)
-		return gerror.SendJobError.With(errMsg)
+		return gerror.InvalidJobProtocolError.With(errMsg)
 	}
 	return nil
 }

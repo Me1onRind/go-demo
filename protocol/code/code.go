@@ -11,7 +11,8 @@ const (
 	ReadDBFail         = -100004
 	WriteDBFail        = -100005
 	GenerateIdFail     = -100006
-	SendJobFail        = -100007
+	InvalidJobProtocol = -100007
+	SendKafkaFail      = -100008
 
 	RecordExisted = -200000
 )

@@ -27,6 +27,7 @@ func (r *RedisJob[T]) Send(ctx context.Context, msgEntity []byte, sendParam *Sen
 
 	redisClient := redis.GetRedisClient(jobCfg.RedisLabel)
 	if err := redisClient.LPush(ctx, jobCfg.QueueKey, msgEntity).Err(); err != nil {
+		return err
 	}
 
 	return nil

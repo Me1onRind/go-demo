@@ -8,6 +8,7 @@ import (
 	"github.com/Me1onRind/go-demo/internal/model/configmd"
 	"github.com/alicebob/miniredis/v2"
 	"github.com/alicebob/miniredis/v2/server"
+	"github.com/go-redis/redis/v8"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -24,7 +25,7 @@ func Test_Base(t *testing.T) {
 	cfg := configmd.RedisConfig{
 		Addr: redisServer.Addr(),
 	}
-	client, err := newRedisPool(&cfg)
+	client, err := NewRedisPool(&cfg)
 	if !assert.Empty(t, err) {
 		return
 	}
@@ -35,4 +36,13 @@ func Test_Base(t *testing.T) {
 	assert.Empty(t, err)
 	assert.Equal(t, "value", string(value))
 	client.Get(ctx, "bad")
+}
+
+func TestSetGetRedis(t *testing.T) {
+	client := &redis.Client{}
+	err := RegisterRedisClient("redis", client)
+	assert.Empty(t, err)
+
+	getClient := GetRedisClient("redis")
+	assert.Equal(t, getClient, client)
 }

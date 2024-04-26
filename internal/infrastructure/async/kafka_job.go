@@ -33,8 +33,7 @@ func (j *KafkaJob[T]) Send(ctx context.Context, msgEntity []byte, sendParam *Sen
 	if err != nil {
 		return err
 	}
-	if _, _, err := client.SendMessage(ctx, jobCfg.Topic, msgEntity,
-		kafka.PartitionKey(sendParam.Key),
+	if _, _, err := client.SendMessage(ctx, jobCfg.Topic, sendParam.Key, msgEntity,
 		kafka.WithHeaers(map[string]string{
 			KafkaJobNameKey: j.Name(),
 		}),

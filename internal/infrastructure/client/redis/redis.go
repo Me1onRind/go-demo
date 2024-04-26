@@ -24,15 +24,14 @@ func GetRedisClient(label string) *redis.Client {
 }
 
 func NewRedisClient(cfg *configmd.RedisConfig) error {
-	client, err := newRedisPool(cfg)
+	client, err := NewRedisPool(cfg)
 	if err != nil {
 		return err
 	}
-	redisClients[cfg.Label] = client
-	return nil
+	return RegisterRedisClient(cfg.Label, client)
 }
 
-func newRedisPool(cfg *configmd.RedisConfig) (*redis.Client, error) {
+func NewRedisPool(cfg *configmd.RedisConfig) (*redis.Client, error) {
 	opt := redis.Options{
 		Addr:     cfg.Addr,
 		Username: cfg.Username,
@@ -72,9 +71,9 @@ func (h *redisHook) AfterProcess(ctx context.Context, cmd redis.Cmder) error {
 	duration := time.Since(startTime)
 
 	if cmd.Err() != nil && !errors.Is(cmd.Err(), redis.Nil) {
-		logger.CtxInfof(ctx, "opt:[%s],key:[%s],params:%v,cost:[%s],err:[%s]", cmd.Name(), key, params, duration, cmd.Err())
+		logger.CtxErrorf(ctx, "opt=%s],key=%s,params=%s,cost=%s,err=%s", cmd.Name(), key, params, duration, cmd.Err())
 	} else {
-		logger.CtxInfof(ctx, "opt:[%s],key:[%s],params:%v,cost:[%s]", cmd.Name(), key, params, duration)
+		logger.CtxInfof(ctx, "opt=%s,key=%s,params=%s,cost=%s", cmd.Name(), key, params, duration)
 	}
 	return nil
 }
@@ -85,4 +84,17 @@ func (h *redisHook) BeforeProcessPipeline(ctx context.Context, cmd []redis.Cmder
 
 func (h *redisHook) AfterProcessPipeline(ctx context.Context, cmd []redis.Cmder) error {
 	return nil
+}
+
+func RegisterRedisClient(label string, client *redis.Client) error {
+	if _, ok := redisClients[label]; ok {
+		return fmt.Errorf("Register redis client failed, cause duplicate, name=%s", label)
+	}
+
+	redisClients[label] = client
+	return nil
+}
+
+func CleanRedisClient(name string) {
+	delete(redisClients, name)
 }

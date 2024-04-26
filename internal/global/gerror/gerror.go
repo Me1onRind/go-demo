@@ -8,10 +8,11 @@ import (
 var (
 	DuplicateError = errors.NewError(code.Duplicate, "Duplicate Request")
 
-	ReadDBError     = errors.NewError(code.ReadDBFail, "Read DB Fail")
-	WriteDBError    = errors.NewError(code.WriteDBFail, "Write DB Fail")
-	GenerateIdError = errors.NewError(code.GenerateIdFail, "Generate Id Fail")
-	SendJobError    = errors.NewError(code.SendJobFail, "Send Job Fail")
+	ReadDBError             = errors.NewError(code.ReadDBFail, "Read DB Fail")
+	WriteDBError            = errors.NewError(code.WriteDBFail, "Write DB Fail")
+	GenerateIdError         = errors.NewError(code.GenerateIdFail, "Generate Id Fail")
+	InvalidJobProtocolError = errors.NewError(code.InvalidJobProtocol, "Invalid Job Protocol")
+	SendKafkaError          = errors.NewError(code.SendKafkaFail, "Send Kafka Fail")
 
 	RecordExistedError = errors.NewError(code.RecordExisted, "Record Is Existed")
 )
