@@ -30,7 +30,7 @@ func Test_KafkaJob_Send(t *testing.T) {
 
 		jobWorker := NewKafkaJob[Msg]("demo", nil)
 		jm := NewJobManager()
-		jm.RegisterJob(jobWorker)
+		assert.Empty(t, jm.RegisterJob(jobWorker))
 		err := jm.Send(context.Background(), "demo", &Msg{Field: "field"}, WithKey("key"))
 		assert.Empty(t, err)
 	})
@@ -39,7 +39,7 @@ func Test_KafkaJob_Send(t *testing.T) {
 		type WrongMsg struct{ Key string }
 		jobWorker := NewKafkaJob[Msg]("demo", nil)
 		jm := NewJobManager()
-		jm.RegisterJob(jobWorker)
+		assert.Empty(t, jm.RegisterJob(jobWorker))
 		err := jm.Send(context.Background(), "demo", &WrongMsg{Key: "wrong"}, WithKey("key"))
 		assert.ErrorIs(t, err, gerror.InvalidJobProtocolError)
 	})

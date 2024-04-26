@@ -21,7 +21,7 @@ func TestSendRedisJob(t *testing.T) {
 
 		jobWorker := NewRedisJob[Msg]("demo", nil)
 		jm := NewJobManager()
-		jm.RegisterJob(jobWorker)
+		assert.Empty(t, jm.RegisterJob(jobWorker))
 
 		err := jm.Send(context.Background(), "demo", &Msg{Field: "field"})
 		assert.Empty(t, err)
