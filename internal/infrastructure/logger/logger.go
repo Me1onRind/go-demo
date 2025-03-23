@@ -51,42 +51,42 @@ func getLoggerFromCtx(ctx context.Context) *zap.SugaredLogger {
 	return globalLogger
 }
 
-func CtxDebugf(ctx context.Context, format string, a ...interface{}) {
+func CtxDebugf(ctx context.Context, format string, a ...any) {
 	getLoggerFromCtx(ctx).Debugf(format, a...)
 }
 
-func Debugf(format string, a ...interface{}) {
+func Debugf(format string, a ...any) {
 	globalLogger.Debugf(format, a...)
 }
 
-func CtxInfof(ctx context.Context, format string, a ...interface{}) {
+func CtxInfof(ctx context.Context, format string, a ...any) {
 	getLoggerFromCtx(ctx).Infof(format, a...)
 }
 
-func Infof(format string, a ...interface{}) {
+func Infof(format string, a ...any) {
 	globalLogger.Infof(format, a...)
 }
 
-func CtxWarnf(ctx context.Context, format string, a ...interface{}) {
+func CtxWarnf(ctx context.Context, format string, a ...any) {
 	getLoggerFromCtx(ctx).Warnf(format, a...)
 }
 
-func Warnf(format string, a ...interface{}) {
+func Warnf(format string, a ...any) {
 	globalLogger.Warnf(format, a...)
 }
 
-func CtxErrorf(ctx context.Context, format string, a ...interface{}) {
+func CtxErrorf(ctx context.Context, format string, a ...any) {
 	getLoggerFromCtx(ctx).Errorf(format, a...)
 }
 
-func Errorf(format string, a ...interface{}) {
+func Errorf(format string, a ...any) {
 	globalLogger.Errorf(format, a...)
 }
 
-func CtxFatalf(ctx context.Context, format string, a ...interface{}) {
+func CtxFatalf(ctx context.Context, format string, a ...any) {
 	getLoggerFromCtx(ctx).Fatalf(format, a...)
 }
 
-func Fatalf(ctx context.Context, format string, a ...interface{}) {
+func Fatalf(ctx context.Context, format string, a ...any) {
 	globalLogger.Fatalf(format, a...)
 }

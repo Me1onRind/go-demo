@@ -83,23 +83,25 @@ func (i *idDomain) GetId(ctx context.Context, idType idpo.IdType, maxTry int) (u
 
 	id, ok := pool.getId()
 	if ok {
+		logger.CtxDebugf(ctx, "generate idtype:%s, id:%d", idType, id)
 		return id, nil
 	}
 
-	for j := 0; j < maxTry; j++ {
+	logger.CtxDebugf(ctx, "idtype:%s id used up, try pull", idType)
+	for j := range maxTry {
 		record, err := i.IdRepo.GetRecord(ctx, idrepo.WithIdType(idType))
 		if err != nil {
-			return 0, err
+			return 0, gerror.GenerateIdError.Infof("id_type:%s", idType).Wrap(err)
 		}
 
 		if record.Step == 0 {
 			logger.CtxErrorf(ctx, "Id pool is invalid, idType:[%d]", idType)
-			return 0, gerror.GenerateIdError.Wrap(ErrPoolStepIsZero)
+			return 0, gerror.GenerateIdError.Infof("id_type:%s", idType).Wrap(err)
 		}
 
 		rows, err := i.IdRepo.UpdateOffset(ctx, idType, record.Offset, record.Step)
 		if err != nil {
-			return 0, err
+			return 0, gerror.GenerateIdError.Wrap(ErrPoolStepIsZero)
 		}
 
 		if rows == 0 {
@@ -115,5 +117,5 @@ func (i *idDomain) GetId(ctx context.Context, idType idpo.IdType, maxTry int) (u
 		return id, nil
 	}
 
-	return 0, gerror.GenerateIdError.Wrap(ErrGetPoolFromDBFail)
+	return 0, gerror.GenerateIdError.Infof("id_type:%s", idType).Wrap(ErrGetPoolFromDBFail)
 }

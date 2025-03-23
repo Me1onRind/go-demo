@@ -3,19 +3,25 @@ package middleware
 import (
 	"context"
 	"errors"
+	"net/http"
 	"strings"
 
 	"github.com/Me1onRind/go-demo/internal/infrastructure/logger"
+	"github.com/Me1onRind/go-demo/internal/infrastructure/tool/random"
 	"github.com/Me1onRind/go-demo/internal/infrastructure/tracer"
+	"github.com/Me1onRind/go-demo/protocol/httpheader"
 	"github.com/gin-gonic/gin"
 	opentracing "github.com/opentracing/opentracing-go"
 	"go.elastic.co/apm/module/apmhttp"
 )
 
-func Tracer(ctx context.Context, spanName string, carrier opentracing.HTTPHeadersCarrier) (context.Context, opentracing.Span) {
+func Tracer(ctx context.Context, spanName string, header http.Header) (context.Context, opentracing.Span) {
+	carrier := opentracing.HTTPHeadersCarrier(header)
+
 	var traceId, spanId string
 	var span opentracing.Span
 	spanContext, err := opentracing.GlobalTracer().Extract(opentracing.HTTPHeaders, carrier)
+
 	if spanContext == nil {
 		if err != nil && !errors.Is(err, opentracing.ErrSpanContextNotFound) {
 			logger.Errorf("extract error:[%s], carrier:[%v]", err, carrier)
@@ -31,12 +37,18 @@ func Tracer(ctx context.Context, spanName string, carrier opentracing.HTTPHeader
 		span = opentracing.GlobalTracer().StartSpan(spanName, opentracing.ChildOf(spanContext))
 		traceId, spanId = traceIdAndSpanIdFromSpan(carrier)
 	}
-	if len(traceId) == 0 || len(spanId) == 0 {
+
+	requestId := getRequestId(header)
+
+	if len(traceId) == 0 || len(spanId) == 0 || len(requestId) == 0 {
 		logger.Errorf("traceId:[%s],spanId:[%s],should be not happen,http_header:[%v]", traceId, spanId, carrier)
 	}
+
 	ctx = tracer.WithTracerId(ctx, traceId, spanId)
 	ctx = tracer.WithSpan(ctx, span)
-	ctx = logger.WithFields(ctx, logger.TraceIdKey, traceId, logger.SpanIdKey, spanId)
+	ctx = tracer.WithRequestId(ctx, requestId)
+
+	ctx = logger.WithFields(ctx, logger.RequestIdKey, requestId, logger.TraceIdKey, traceId, logger.SpanIdKey, spanId)
 	return ctx, span
 
 }
@@ -44,7 +56,7 @@ func Tracer(ctx context.Context, spanName string, carrier opentracing.HTTPHeader
 func GinTracer() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		ctx := mustGetGinExtractContext(c)
-		ctx, span := Tracer(ctx, c.Request.URL.Path, opentracing.HTTPHeadersCarrier(c.Request.Header))
+		ctx, span := Tracer(ctx, c.Request.URL.Path, c.Request.Header)
 		defer span.Finish()
 		setGinExtractContext(c, ctx)
 		c.Next()
@@ -66,4 +78,12 @@ func traceIdAndSpanIdFromW3CTraceparent(values []string) (string, string) {
 		}
 	}
 	return "", ""
+}
+
+func getRequestId(header http.Header) string {
+	requestIdValaue := header[httpheader.RequestIdKey]
+	if len(requestIdValaue) > 0 {
+		return requestIdValaue[0]
+	}
+	return random.UUID()
 }

@@ -40,6 +40,11 @@ func (e *Error) With(msg string) error {
 	return fmt.Errorf("%w, cause:[%s]", e, msg)
 }
 
+func (e *Error) Infof(format string, a ...any) *Error {
+	e.message = fmt.Sprintf("%s,"+format, e.message, a)
+	return e
+}
+
 func ExtractError(err error) *Error {
 	var e *Error
 	if errors.As(err, &e) {
@@ -47,10 +52,3 @@ func ExtractError(err error) *Error {
 	}
 	return nil
 }
-
-//func CodeEqual(err error, code int) bool {
-//if e := ExtractError(err); e != nil {
-//return e.Code == code
-//}
-//return false
-//}

@@ -8,6 +8,7 @@ import (
 type spanKey struct{}
 type traceIdKey struct{}
 type spanIdKey struct{}
+type requestIdKey struct{}
 
 func WithSpan(ctx context.Context, span opentracing.Span) context.Context {
 	return context.WithValue(ctx, spanKey{}, span)
@@ -15,6 +16,10 @@ func WithSpan(ctx context.Context, span opentracing.Span) context.Context {
 
 func WithTracerId(ctx context.Context, traceId, spanId string) context.Context {
 	return context.WithValue(context.WithValue(ctx, spanIdKey{}, spanId), traceIdKey{}, traceId)
+}
+
+func WithRequestId(ctx context.Context, requestId string) context.Context {
+	return context.WithValue(ctx, requestIdKey{}, requestId)
 }
 
 func GetTraceId(ctx context.Context) string {

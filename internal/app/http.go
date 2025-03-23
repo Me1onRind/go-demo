@@ -53,7 +53,7 @@ func (h *HttpServer) Init() *HttpServer {
 		initialize.InitMysqlClient(),
 	}
 	ctx := context.Background()
-	ctx = logger.WithFields(ctx, logger.TraceIdKey, "main-goruntine")
+	ctx = logger.WithFields(ctx, logger.RequestIdKey, "main-goruntine")
 
 	for _, f := range initFuncs {
 		if err := f(ctx); err != nil {

@@ -22,7 +22,11 @@ func NewUserUsecase() *UserUsecase {
 }
 
 func (u *UserUsecase) GetUserDetail(ctx context.Context, request *userproto.GetUserDetailReq) (any, error) {
-	return u.UserRepo.GetUser(ctx, userrepo.WithUserId(request.UserId))
+	user, err := u.UserRepo.GetUser(ctx, userrepo.WithUserId(request.UserId))
+	if err != nil {
+		return nil, err
+	}
+	return user.ToProtocoUser(), nil
 }
 
 func (u *UserUsecase) CreateUser(ctx context.Context, request *userproto.CreateUserReq) (any, error) {
@@ -30,5 +34,9 @@ func (u *UserUsecase) CreateUser(ctx context.Context, request *userproto.CreateU
 		Name:  request.Name,
 		Email: request.Email,
 	}
-	return u.UserDomain.CreateUser(ctx, user)
+	createUser, err := u.UserDomain.CreateUser(ctx, user)
+	if err != nil {
+		return nil, err
+	}
+	return createUser.ToProtocoUser(), nil
 }
