@@ -1,6 +1,7 @@
 etcd:
   endpoints:
     - 127.0.0.1:2379
-  dial_timeout: 2s
+  dial_timeout: 1s
+  read_timeout: 1s
 
 dym_cfg_key: "/go-demo/config.yml"

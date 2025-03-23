@@ -1,6 +1,6 @@
 module github.com/Me1onRind/go-demo
 
-go 1.20
+go 1.24
 
 require (
 	github.com/DATA-DOG/go-sqlmock v1.5.0

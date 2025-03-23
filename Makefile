@@ -4,6 +4,8 @@ http_run:
 	go run ./cmd/http/main.go
 
 supervisor_run:
+	mkdir -p ./supervisor/log
+	mkdir -p ./supervisor/run
 	supervisord -c ./supervisor/supervisord.conf # /etc/rc.local  auto run in power on.
 
 lint:

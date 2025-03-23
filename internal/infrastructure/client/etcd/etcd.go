@@ -39,11 +39,10 @@ func NewEtcdClient(cfg *clientv3.Config) (Client, error) {
 }
 
 func (e *etcdClient) Get(ctx context.Context, key string, timeout time.Duration) ([]byte, error) {
-	if timeout > 0 {
-		var cancel context.CancelFunc
-		ctx, cancel = context.WithTimeout(ctx, timeout)
-		defer cancel()
-	}
+	timeout = e.getTimeout(timeout)
+	var cancel context.CancelFunc
+	ctx, cancel = context.WithTimeout(ctx, timeout)
+	defer cancel()
 
 	resp, err := e.invoker.Get(ctx, key)
 	if err != nil {
@@ -58,11 +57,10 @@ func (e *etcdClient) Get(ctx context.Context, key string, timeout time.Duration)
 }
 
 func (e *etcdClient) Put(ctx context.Context, key, value string, timeout time.Duration) error {
-	if timeout > 0 {
-		var cancel context.CancelFunc
-		ctx, cancel = context.WithTimeout(ctx, timeout)
-		defer cancel()
-	}
+	timeout = e.getTimeout(timeout)
+	var cancel context.CancelFunc
+	ctx, cancel = context.WithTimeout(ctx, timeout)
+	defer cancel()
 
 	logger.CtxInfof(ctx, "Put key:[%s], value:\n%s", key, value)
 	_, err := e.invoker.Put(ctx, key, value)
@@ -95,4 +93,11 @@ func (e *etcdClient) Watch(ctx context.Context, key string, f WatchHandler) {
 
 func (e *etcdClient) Close() error {
 	return e.invoker.Close()
+}
+
+func (e *etcdClient) getTimeout(timeout time.Duration) time.Duration {
+	if timeout > 0 {
+		return timeout
+	}
+	return time.Second * 5
 }

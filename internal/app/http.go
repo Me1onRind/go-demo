@@ -48,9 +48,9 @@ func (h *HttpServer) Init() *HttpServer {
 	initFuncs := []initialize.InitHandler{
 		initialize.InitOpentracking("go-demo", "0.0.1"),
 		initialize.InitFileConfig("./conf.yml"),
-		//initialize.InitEtcdClient(),
-		//initialize.InitDynamicConfig(),
-		//initialize.InitMysqlClient(),
+		initialize.InitEtcdClient(),
+		initialize.InitDynamicConfig(),
+		initialize.InitMysqlClient(),
 	}
 	ctx := context.Background()
 	ctx = logger.WithFields(ctx, logger.TraceIdKey, "main-goruntine")

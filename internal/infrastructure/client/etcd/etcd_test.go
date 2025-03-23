@@ -53,7 +53,6 @@ func Test_Watch(t *testing.T) {
 	ctx := context.Background()
 	key := "/unit_test_key"
 	setValue := time.Now().String()
-	timeout := time.Second * 2
 
 	var getValue string
 	watchCtx, cancel := context.WithCancel(ctx)
@@ -66,7 +65,7 @@ func Test_Watch(t *testing.T) {
 
 	go client.Watch(ctx, key, cb)
 	time.Sleep(time.Millisecond * 50)
-	err := client.Put(ctx, key, setValue, timeout)
+	err := client.Put(ctx, key, setValue, 0)
 	if !assert.Empty(t, err) {
 		return
 	}
